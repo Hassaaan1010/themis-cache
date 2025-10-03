@@ -17,7 +17,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
-      <version>4.1.99.Final</version>
+      <version>4.1.109.Final</version>
     </dependency>
     <!-- Caffeine -->
     <dependency>
@@ -32,4 +32,21 @@
       <version>2.0.9</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- Change this to your server entrypoint class -->
+              <mainClass>server.EchoServer</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
