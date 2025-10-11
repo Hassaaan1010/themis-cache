@@ -3,7 +3,7 @@ package server.parsing;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import common.Constants;
+import common.CommonConstants;
 import common.LogUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,7 +15,7 @@ import models.RequestData;
 /*ReplayingDecoder allows waiting for byteBuf to get enough frames to read string of specified length */
 public class RequestDataDecoder extends ReplayingDecoder<RequestData>  {
     
-    private final Charset charset = Constants.DEFAULT_CHARSET;
+    private final Charset charset = CommonConstants.DEFAULT_CHARSET;
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf input, List<Object> output) throws DecoderException {
@@ -26,7 +26,7 @@ public class RequestDataDecoder extends ReplayingDecoder<RequestData>  {
             
             data.setLength(input.readInt());
     
-            data.setAction(input.readCharSequence(Constants.ACTION_LENGTH, charset).toString().toUpperCase());
+            data.setAction(input.readCharSequence(CommonConstants.ACTION_LENGTH, charset).toString().toUpperCase());
     
             CharSequence tempSeq = input.readCharSequence(data.getLength(), charset);
             data.setMessage(tempSeq.toString());

@@ -25,11 +25,11 @@
       <artifactId>slf4j-api</artifactId>
       <version>2.0.9</version>
     </dependency>
-    <!-- Optional WebSocket or HTTP client -->
+    <!-- Netty -->
     <dependency>
-      <groupId>org.java-websocket</groupId>
-      <artifactId>Java-WebSocket</artifactId>
-      <version>1.5.4</version>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.1.109.Final</version>
     </dependency>
     <!-- COMMON -->
     <dependency>

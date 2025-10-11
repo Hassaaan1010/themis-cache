@@ -1,9 +1,9 @@
 package server.handler;
 import java.nio.charset.StandardCharsets;
 
+import common.LogUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelException;
-import common.LogUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -13,6 +13,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         System.out.println("handlerAdded");
+        // TODO: Change constant init buffer capacity written as 4
         buf = ctx.alloc().buffer(4); // (4 bytes)
         System.out.println("buffer added: "+ buf.toString(StandardCharsets.UTF_8)); 
     }

@@ -2,7 +2,7 @@ package server.parsing;
 
 import java.nio.charset.Charset;
 
-import common.Constants;
+import common.CommonConstants;
 import common.LogUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,7 +12,7 @@ import models.ResponseData;
 
 public class ResponseDataEncoder extends MessageToByteEncoder<ResponseData>{
 	
-	private Charset charset = Constants.DEFAULT_CHARSET;
+	private Charset charset = CommonConstants.DEFAULT_CHARSET;
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, ResponseData msg, ByteBuf out) throws EncoderException {

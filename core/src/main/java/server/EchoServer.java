@@ -1,6 +1,6 @@
 package server;
 
-import common.Constants;
+import common.CommonConstants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -64,6 +64,6 @@ public class EchoServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new EchoServer(Constants.SERVER_PORT).start();
+        new EchoServer(CommonConstants.SERVER_PORT).start();
     }
 }
