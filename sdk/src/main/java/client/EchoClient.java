@@ -4,30 +4,25 @@ import client.handler.EchoClientHandler;
 import client.parsing.RequestDataEncoder;
 import client.parsing.ResponseDataDecoder;
 import common.CommonConstants;
+import common.LogUtil;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-
 public class EchoClient {
-    private final int port;
-    private final String host;
 
-    public EchoClient (int port, String host) {
-        this.port = port;
-        this.host = host;
-    }
-    
+    private static ChannelFuture f;
+    private static NioEventLoopGroup workerGroup;
+
+    public EchoClient(int port, String host) {}
 
     public static void main(String[] args) throws Exception {
         
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup();
+        workerGroup = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
@@ -45,14 +40,13 @@ public class EchoClient {
                 }
             });
 
-            ChannelFuture f = b.connect(CommonConstants.SERVER_HOST, CommonConstants.SERVER_PORT).sync();
+            f = b.connect(CommonConstants.SERVER_HOST, CommonConstants.SERVER_PORT).sync();
             f.channel().closeFuture().sync();
 
         } catch (Exception e) {
-
+            LogUtil.log("Error in Echo Client : ","Error", e);
         } finally {
             workerGroup.shutdownGracefully();
         }
     }
 }
-

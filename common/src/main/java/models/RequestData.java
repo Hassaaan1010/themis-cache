@@ -5,7 +5,6 @@ public class RequestData {
     private String message;
     private String action;
 
-
     public int getLength() {
         return length;
     }
@@ -29,7 +28,13 @@ public class RequestData {
     public void setAction(String action) {
         this.action = action;
     }
+
+    @Override
+    public String toString() {
+        return "RequestData{" +
+                "length=" + length +
+                ", action='" + action + '\'' +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }
-
-
-

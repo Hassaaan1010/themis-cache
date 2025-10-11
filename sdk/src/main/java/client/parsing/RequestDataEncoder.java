@@ -25,8 +25,8 @@ public class RequestDataEncoder extends MessageToByteEncoder<RequestData> {
             LogUtil.log("CLIENT: log from ReqDataEncoder", "ReqData",msg, "Output",out);
 
         } catch (Exception e) {
-            LogUtil.log("Error in Client log from ReqDataEncoder", "ReqData",msg, "Output",out);
-            throw new UnsupportedOperationException("Unimplemented method 'encode'");
+            LogUtil.log("Error in Client log from ReqDataEncoder", "RequestData",msg, "Output",out, "Error", e);
+            // throw new UnsupportedOperationException("Unimplemented method 'encode'");
         }
     }
     

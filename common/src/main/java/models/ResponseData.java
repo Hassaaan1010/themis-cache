@@ -19,8 +19,8 @@ public class ResponseData {
 
     public void setStatus(int value) {
         this.status = value;
-    } 
-    
+    }
+
     public void setLength(int length) {
         this.length = length;
     }
@@ -29,5 +29,13 @@ public class ResponseData {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "RequestData{" +
+                "length=" + length +
+                ", status='" + status + '\'' +
+                ", data='" + data + '\'' +
+                '}';
+    }
 
 }

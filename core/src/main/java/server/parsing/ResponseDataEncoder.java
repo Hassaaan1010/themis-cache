@@ -28,7 +28,8 @@ public class ResponseDataEncoder extends MessageToByteEncoder<ResponseData>{
 		} catch (Exception e) {
 			LogUtil.log("Error occured while encoding Response Data object:", 
 				"msg" , msg,
-						"out" , out
+						"out" , out,
+						"Error", e
 			);
 			throw new EncoderException();
 		}

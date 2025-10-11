@@ -1,14 +1,15 @@
 package common;
 
-
 public class LogUtil {
-    /* Example Use
+    /*
+     * Example Use
      * ErrorHelper.log(
-        "Error while encoding ResponseData",
-        "ResponseData", msg,
-        "OutputByteBuf", out,
-        "Charset", charset
-    );*/
+     * "Error while encoding ResponseData",
+     * "ResponseData", msg,
+     * "OutputByteBuf", out,
+     * "Charset", charset
+     * );
+     */
 
     public static void log(String message, Object... vars) {
         StringBuilder sb = new StringBuilder();

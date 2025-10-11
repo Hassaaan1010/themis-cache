@@ -1,4 +1,5 @@
 package server.handler;
+
 import java.nio.charset.StandardCharsets;
 
 import common.LogUtil;
@@ -6,6 +7,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import models.RequestData;
+import models.ResponseData;
 
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     private ByteBuf buf;
@@ -15,7 +18,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         System.out.println("handlerAdded");
         // TODO: Change constant init buffer capacity written as 4
         buf = ctx.alloc().buffer(4); // (4 bytes)
-        System.out.println("buffer added: "+ buf.toString(StandardCharsets.UTF_8)); 
+        System.out.println("buffer added: " + buf.toString(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -26,14 +29,26 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException{
-       try {
-            ByteBuf m = (ByteBuf) msg;
-            LogUtil.log("Reacher channel read : ", "byteBuf m ",m.toString());
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
+        try {
+            LogUtil.log("Reached channel read : ", "Got msg from client ", msg.toString());
+            RequestData req = (RequestData) msg;
 
-       } catch (Exception e) {
-            LogUtil.log("Channel read error:", "something", 123);
-       }
+            if ("GET".equals(req.getAction()) && "PING".equals(req.getMessage())) {
+                ResponseData res = new ResponseData();
+
+                res.setStatus(200);
+                res.setLength(4);
+                res.setData("PONG");
+
+                ctx.writeAndFlush(res);
+            } else {
+                throw new ChannelException("Request not as expected" + req);
+            }
+
+        } catch (Exception e) {
+            LogUtil.log("Channel read error:", "Error", e);
+        }
     }
 
     @Override
