@@ -1,5 +1,6 @@
 package server;
 
+import common.Constants;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -7,6 +8,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import server.handler.EchoServerHandler;
+import server.parsing.RequestDataDecoder;
+import server.parsing.ResponseDataEncoder;
 
 
 public class EchoServer {
@@ -43,7 +46,10 @@ public class EchoServer {
              .childHandler(new ChannelInitializer<SocketChannel>() { 
                  @Override
                  protected void initChannel(SocketChannel ch) {
-                     ch.pipeline().addLast(new EchoServerHandler());
+                     ch.pipeline()
+                     .addLast(new RequestDataDecoder())
+                     .addLast(new ResponseDataEncoder())
+                     .addLast(new EchoServerHandler());
                  }
              });
 
@@ -58,6 +64,6 @@ public class EchoServer {
     }
 
     public static void main(String[] args) throws Exception {
-        new EchoServer(8080).start();
+        new EchoServer(Constants.SERVER_PORT).start();
     }
 }

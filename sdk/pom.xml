@@ -31,5 +31,11 @@
       <artifactId>Java-WebSocket</artifactId>
       <version>1.5.4</version>
     </dependency>
+    <!-- COMMON -->
+    <dependency>
+      <groupId>com.hassaan</groupId>
+      <artifactId>common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>

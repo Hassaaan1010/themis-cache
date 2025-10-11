@@ -12,6 +12,7 @@
   <modules>
     <module>core</module>
     <module>sdk</module>
+    <module>common</module>
   </modules>
   <properties>
     <maven.compiler.source>24</maven.compiler.source>
