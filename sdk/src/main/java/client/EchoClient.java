@@ -1,10 +1,10 @@
 package client;
 
 import client.handler.EchoClientHandler;
-import client.parsing.RequestDataEncoder;
-import client.parsing.ResponseDataDecoder;
+import client.parsing.ByteBufClientCodec;
 import common.CommonConstants;
 import common.LogUtil;
+import common.interfaces.Codec;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,41 +12,64 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import models.RequestData;
+import models.ResponseData;
 
 public class EchoClient {
 
-    private static ChannelFuture f;
-    private static NioEventLoopGroup workerGroup;
+    private ChannelFuture channelFuture;
+    private NioEventLoopGroup workerGroup;
 
-    public EchoClient(int port, String host) {}
+    public EchoClient() {
+    }
 
-    public static void main(String[] args) throws Exception {
-        
-        workerGroup = new NioEventLoopGroup();
+    public void start() throws Exception {
         try {
-            Bootstrap b = new Bootstrap();
-            b.group(workerGroup);
-            b.channel(NioSocketChannel.class);
-            b.option(ChannelOption.SO_KEEPALIVE, true);
-            b.handler(new ChannelInitializer<SocketChannel>() {
- 
-                @Override
-                public void initChannel(SocketChannel ch) 
-                  throws Exception {
-                    ch.pipeline()
-                    .addLast(new RequestDataEncoder())
-                    .addLast(new ResponseDataDecoder())
-                    .addLast(new EchoClientHandler());
-                }
-            });
+            workerGroup = new NioEventLoopGroup();
+            Codec<RequestData, ResponseData> codec = new ByteBufClientCodec();
 
-            f = b.connect(CommonConstants.SERVER_HOST, CommonConstants.SERVER_PORT).sync();
-            f.channel().closeFuture().sync();
+            Bootstrap b = new Bootstrap();
+            b.group(workerGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                            .addLast(codec.newDecoder())
+                            .addLast(codec.newEncoder())
+                            .addLast(new EchoClientHandler());
+                    }
+                });
+
+            channelFuture = b.connect(CommonConstants.SERVER_HOST, CommonConstants.SERVER_PORT).sync();
+            System.out.println("Client connected to " + CommonConstants.SERVER_HOST + ":" + CommonConstants.SERVER_PORT);
+
+            channelFuture.channel().closeFuture().sync();
 
         } catch (Exception e) {
-            LogUtil.log("Error in Echo Client : ","Error", e);
+            LogUtil.log("Error in Echo Client : ", "Error", e);
         } finally {
             workerGroup.shutdownGracefully();
         }
+    }
+
+    public void shutdown() {
+        System.out.println("Shutting down client gracefully...");
+        if (channelFuture != null) {
+            channelFuture.channel().close();
+        }
+        if (workerGroup != null) {
+            workerGroup.shutdownGracefully();
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        EchoClient client = new EchoClient();
+
+        // Hook for Ctrl+C or SIGTERM
+        Runtime.getRuntime().addShutdownHook(new Thread(client::shutdown));
+        
+        client.start();
     }
 }

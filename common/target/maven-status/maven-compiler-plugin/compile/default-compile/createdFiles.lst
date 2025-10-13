@@ -1,4 +1,5 @@
 common/LogUtil.class
 models/RequestData.class
+common/interfaces/Codec.class
 common/CommonConstants.class
 models/ResponseData.class

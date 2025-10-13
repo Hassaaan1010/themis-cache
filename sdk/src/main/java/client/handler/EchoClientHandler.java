@@ -20,10 +20,12 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter{
             msg.setLength(message.length());
             msg.setMessage(message);
             msg.setAction("GET");
-    
-            ctx.writeAndFlush(msg);
+            for (int i = 0; i < 10; i++) {
+                ctx.write(msg);
+            }
+            ctx.flush();
             // future.addListener(ChannelFutureListener.CLOSE);
-            LogUtil.log("Log from EchoClient Handler", "msg", msg);
+            // LogUtil.log("Log from EchoClient Handler", "msg", msg);
             
         } catch (Exception e) {
             LogUtil.log("Error in EchoClientHandler ", "Error", e);
@@ -36,8 +38,8 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter{
         try {
             System.out.println("Reached Channel Handler");
             ResponseData resp = (ResponseData) msg;
-            LogUtil.log( null, "ResponseData : ",resp);
-            ctx.close();
+            // LogUtil.log( null, "ResponseData : ",resp);
+            // ctx.close();
         } catch (Exception e) {
             LogUtil.log("Error in Client channelRead:", "Response data", (ResponseData) msg);
         }
