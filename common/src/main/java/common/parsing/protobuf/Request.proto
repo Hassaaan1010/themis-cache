@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+// option java_multiple_files = true;
+option java_package = "common.parsing.protos";
+option java_outer_classname = "RequestProtos";
+
+enum Action {
+    GET = 0;
+    SET = 1;
+    DEL = 2;
+    AUTH = 3;
+}
+
+message Request {
+    Action action = 1;
+    bytes token = 2; // [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+    bytes key = 3; // [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+    bytes value = 4;  // [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+}

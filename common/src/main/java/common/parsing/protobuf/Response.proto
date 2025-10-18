@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+// option java_multiple_files = true;
+option java_package = "common.parsing.protos";
+option java_outer_classname = "ResponseProtos";
+
+message Response {
+    int32 status = 1;
+    string message = 2;
+    int32 length = 3;
+    bytes value = 4;
+}

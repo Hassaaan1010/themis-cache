@@ -1,10 +1,10 @@
 package server;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoDatabase;
 
 import common.CommonConstants;
 import common.interfaces.Codec;
+import common.parsing.protos.RequestProtos;
+import common.parsing.protos.ResponseProtos;
 import db.MongoService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -12,10 +12,11 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import models.RequestData;
-import models.ResponseData;
+// import models.RequestData;
+// import models.ResponseData;
 import server.handler.EchoServerHandler;
-import server.parsing.ByteBufServerCodec;
+// import server.parsing.ByteBufServerCodec;
+import server.parsing.ProtobufServerCodec;
 import common.LogUtil;
 
 public class EchoServer {
@@ -24,7 +25,6 @@ public class EchoServer {
     private ChannelFuture channelFuture;
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
-    private MongoDatabase db;
 
     public EchoServer() {
         this.port = CommonConstants.SERVER_PORT;
@@ -32,18 +32,16 @@ public class EchoServer {
 
     public void start() throws Exception {
         try {
-
+            // Force MongoService class to load and initialize DB
             Class.forName("db.MongoService");
 
-            // Start DB
-            db = MongoService.getDb();
-
+            // Initialize Netty
+            
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
 
-            Codec<RequestData, ResponseData> codec = new ByteBufServerCodec();
-
-            // Force MongoService class to load and initialize DB
+            // Codec<RequestData, ResponseData> codec = new ByteBufServerCodec();
+            Codec<RequestProtos.Request, ResponseProtos.Response> codec = new ProtobufServerCodec();
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)

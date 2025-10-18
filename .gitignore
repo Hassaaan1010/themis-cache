@@ -8,9 +8,9 @@
 *.ctxt
 
 #target
-core/target/*
-sdk/target/*
-common/target/*
+core/target/
+sdk/target/
+common/target/
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
