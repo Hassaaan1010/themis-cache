@@ -12,6 +12,23 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>sdk</artifactId>
+  <!-- Build -->
+  <!-- <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>client.EchoClient</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build> -->
   <dependencies>
     <!-- Gson for JSON handling -->
     <dependency>

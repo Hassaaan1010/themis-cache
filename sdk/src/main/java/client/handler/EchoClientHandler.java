@@ -38,7 +38,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter{
         try {
             System.out.println("Reached Channel Handler");
             ResponseData resp = (ResponseData) msg;
-            // LogUtil.log( null, "ResponseData : ",resp);
+            LogUtil.log( null, "ResponseData : ",resp);
             // ctx.close();
         } catch (Exception e) {
             LogUtil.log("Error in Client channelRead:", "Response data", (ResponseData) msg);
