@@ -20,10 +20,13 @@ public class MongoService {
         client = MongoClients.create(EnvConfig.DB_URI_STRING);
         db = client.getDatabase(EnvConfig.DB_NAME);
 
+        
+        LogUtil.log("✅ MongoDB Initialized.");
+
+
         // collections
         UserCollection = db.getCollection("Users");
-
-        LogUtil.log("✅ MongoDB Initialized.");
+        LogUtil.log("Users collection initialized successfully.");
     }
 
 

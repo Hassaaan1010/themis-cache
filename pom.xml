@@ -28,6 +28,12 @@
         <artifactId>netty-all</artifactId>
         <version>4.1.109.Final</version>
       </dependency>
+      <!-- .env -->
+      <dependency>
+        <groupId>io.github.cdimascio</groupId>
+        <artifactId>java-dotenv</artifactId>
+        <version>5.2.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>

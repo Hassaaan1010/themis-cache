@@ -160,20 +160,40 @@ public final class RequestProtos {
      * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
      * </pre>
      *
-     * <code>bytes token = 2;</code>
+     * <code>string token = 2;</code>
      * @return The token.
      */
-    com.google.protobuf.ByteString getToken();
+    java.lang.String getToken();
+    /**
+     * <pre>
+     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+     * </pre>
+     *
+     * <code>string token = 2;</code>
+     * @return The bytes for token.
+     */
+    com.google.protobuf.ByteString
+        getTokenBytes();
 
     /**
      * <pre>
      * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
      * </pre>
      *
-     * <code>bytes key = 3;</code>
+     * <code>string key = 3;</code>
      * @return The key.
      */
-    com.google.protobuf.ByteString getKey();
+    java.lang.String getKey();
+    /**
+     * <pre>
+     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+     * </pre>
+     *
+     * <code>string key = 3;</code>
+     * @return The bytes for key.
+     */
+    com.google.protobuf.ByteString
+        getKeyBytes();
 
     /**
      * <pre>
@@ -184,6 +204,18 @@ public final class RequestProtos {
      * @return The value.
      */
     com.google.protobuf.ByteString getValue();
+
+    /**
+     * <code>int32 value_length = 5;</code>
+     * @return The valueLength.
+     */
+    int getValueLength();
+
+    /**
+     * <code>int32 key_length = 6;</code>
+     * @return The keyLength.
+     */
+    int getKeyLength();
   }
   /**
    * Protobuf type {@code Request}
@@ -199,8 +231,8 @@ public final class RequestProtos {
     }
     private Request() {
       action_ = 0;
-      token_ = com.google.protobuf.ByteString.EMPTY;
-      key_ = com.google.protobuf.ByteString.EMPTY;
+      token_ = "";
+      key_ = "";
       value_ = com.google.protobuf.ByteString.EMPTY;
     }
 
@@ -248,33 +280,97 @@ public final class RequestProtos {
     }
 
     public static final int TOKEN_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString token_ = com.google.protobuf.ByteString.EMPTY;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object token_ = "";
     /**
      * <pre>
      * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
      * </pre>
      *
-     * <code>bytes token = 2;</code>
+     * <code>string token = 2;</code>
      * @return The token.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getToken() {
-      return token_;
+    public java.lang.String getToken() {
+      java.lang.Object ref = token_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        token_ = s;
+        return s;
+      }
     }
-
-    public static final int KEY_FIELD_NUMBER = 3;
-    private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
      * </pre>
      *
-     * <code>bytes key = 3;</code>
+     * <code>string token = 2;</code>
+     * @return The bytes for token.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getTokenBytes() {
+      java.lang.Object ref = token_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        token_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KEY_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object key_ = "";
+    /**
+     * <pre>
+     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+     * </pre>
+     *
+     * <code>string key = 3;</code>
      * @return The key.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getKey() {
-      return key_;
+    public java.lang.String getKey() {
+      java.lang.Object ref = key_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        key_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+     * </pre>
+     *
+     * <code>string key = 3;</code>
+     * @return The bytes for key.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKeyBytes() {
+      java.lang.Object ref = key_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        key_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     public static final int VALUE_FIELD_NUMBER = 4;
@@ -290,6 +386,28 @@ public final class RequestProtos {
     @java.lang.Override
     public com.google.protobuf.ByteString getValue() {
       return value_;
+    }
+
+    public static final int VALUE_LENGTH_FIELD_NUMBER = 5;
+    private int valueLength_ = 0;
+    /**
+     * <code>int32 value_length = 5;</code>
+     * @return The valueLength.
+     */
+    @java.lang.Override
+    public int getValueLength() {
+      return valueLength_;
+    }
+
+    public static final int KEY_LENGTH_FIELD_NUMBER = 6;
+    private int keyLength_ = 0;
+    /**
+     * <code>int32 key_length = 6;</code>
+     * @return The keyLength.
+     */
+    @java.lang.Override
+    public int getKeyLength() {
+      return keyLength_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -309,14 +427,20 @@ public final class RequestProtos {
       if (action_ != common.parsing.protos.RequestProtos.Action.GET.getNumber()) {
         output.writeEnum(1, action_);
       }
-      if (!token_.isEmpty()) {
-        output.writeBytes(2, token_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(token_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, token_);
       }
-      if (!key_.isEmpty()) {
-        output.writeBytes(3, key_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, key_);
       }
       if (!value_.isEmpty()) {
         output.writeBytes(4, value_);
+      }
+      if (valueLength_ != 0) {
+        output.writeInt32(5, valueLength_);
+      }
+      if (keyLength_ != 0) {
+        output.writeInt32(6, keyLength_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -331,17 +455,23 @@ public final class RequestProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, action_);
       }
-      if (!token_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, token_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(token_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, token_);
       }
-      if (!key_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, key_);
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, key_);
       }
       if (!value_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, value_);
+      }
+      if (valueLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, valueLength_);
+      }
+      if (keyLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, keyLength_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -365,6 +495,10 @@ public final class RequestProtos {
           .equals(other.getKey())) return false;
       if (!getValue()
           .equals(other.getValue())) return false;
+      if (getValueLength()
+          != other.getValueLength()) return false;
+      if (getKeyLength()
+          != other.getKeyLength()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -384,6 +518,10 @@ public final class RequestProtos {
       hash = (53 * hash) + getKey().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue().hashCode();
+      hash = (37 * hash) + VALUE_LENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getValueLength();
+      hash = (37 * hash) + KEY_LENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getKeyLength();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -514,9 +652,11 @@ public final class RequestProtos {
         super.clear();
         bitField0_ = 0;
         action_ = 0;
-        token_ = com.google.protobuf.ByteString.EMPTY;
-        key_ = com.google.protobuf.ByteString.EMPTY;
+        token_ = "";
+        key_ = "";
         value_ = com.google.protobuf.ByteString.EMPTY;
+        valueLength_ = 0;
+        keyLength_ = 0;
         return this;
       }
 
@@ -561,6 +701,12 @@ public final class RequestProtos {
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
           result.value_ = value_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.valueLength_ = valueLength_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.keyLength_ = keyLength_;
         }
       }
 
@@ -611,14 +757,24 @@ public final class RequestProtos {
         if (other.action_ != 0) {
           setActionValue(other.getActionValue());
         }
-        if (other.getToken() != com.google.protobuf.ByteString.EMPTY) {
-          setToken(other.getToken());
+        if (!other.getToken().isEmpty()) {
+          token_ = other.token_;
+          bitField0_ |= 0x00000002;
+          onChanged();
         }
-        if (other.getKey() != com.google.protobuf.ByteString.EMPTY) {
-          setKey(other.getKey());
+        if (!other.getKey().isEmpty()) {
+          key_ = other.key_;
+          bitField0_ |= 0x00000004;
+          onChanged();
         }
         if (other.getValue() != com.google.protobuf.ByteString.EMPTY) {
           setValue(other.getValue());
+        }
+        if (other.getValueLength() != 0) {
+          setValueLength(other.getValueLength());
+        }
+        if (other.getKeyLength() != 0) {
+          setKeyLength(other.getKeyLength());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -652,12 +808,12 @@ public final class RequestProtos {
                 break;
               } // case 8
               case 18: {
-                token_ = input.readBytes();
+                token_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
-                key_ = input.readBytes();
+                key_ = input.readStringRequireUtf8();
                 bitField0_ |= 0x00000004;
                 break;
               } // case 26
@@ -666,6 +822,16 @@ public final class RequestProtos {
                 bitField0_ |= 0x00000008;
                 break;
               } // case 34
+              case 40: {
+                valueLength_ = input.readInt32();
+                bitField0_ |= 0x00000010;
+                break;
+              } // case 40
+              case 48: {
+                keyLength_ = input.readInt32();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -736,29 +902,59 @@ public final class RequestProtos {
         return this;
       }
 
-      private com.google.protobuf.ByteString token_ = com.google.protobuf.ByteString.EMPTY;
+      private java.lang.Object token_ = "";
       /**
        * <pre>
        * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
        * </pre>
        *
-       * <code>bytes token = 2;</code>
+       * <code>string token = 2;</code>
        * @return The token.
        */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getToken() {
-        return token_;
+      public java.lang.String getToken() {
+        java.lang.Object ref = token_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          token_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
       /**
        * <pre>
        * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
        * </pre>
        *
-       * <code>bytes token = 2;</code>
+       * <code>string token = 2;</code>
+       * @return The bytes for token.
+       */
+      public com.google.protobuf.ByteString
+          getTokenBytes() {
+        java.lang.Object ref = token_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          token_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+       * </pre>
+       *
+       * <code>string token = 2;</code>
        * @param value The token to set.
        * @return This builder for chaining.
        */
-      public Builder setToken(com.google.protobuf.ByteString value) {
+      public Builder setToken(
+          java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         token_ = value;
         bitField0_ |= 0x00000002;
@@ -770,39 +966,87 @@ public final class RequestProtos {
        * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
        * </pre>
        *
-       * <code>bytes token = 2;</code>
+       * <code>string token = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearToken() {
-        bitField0_ = (bitField0_ & ~0x00000002);
         token_ = getDefaultInstance().getToken();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+       * </pre>
+       *
+       * <code>string token = 2;</code>
+       * @param value The bytes for token to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTokenBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        token_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
 
-      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      private java.lang.Object key_ = "";
       /**
        * <pre>
        * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
        * </pre>
        *
-       * <code>bytes key = 3;</code>
+       * <code>string key = 3;</code>
        * @return The key.
        */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getKey() {
-        return key_;
+      public java.lang.String getKey() {
+        java.lang.Object ref = key_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          key_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
       /**
        * <pre>
        * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
        * </pre>
        *
-       * <code>bytes key = 3;</code>
+       * <code>string key = 3;</code>
+       * @return The bytes for key.
+       */
+      public com.google.protobuf.ByteString
+          getKeyBytes() {
+        java.lang.Object ref = key_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          key_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+       * </pre>
+       *
+       * <code>string key = 3;</code>
        * @param value The key to set.
        * @return This builder for chaining.
        */
-      public Builder setKey(com.google.protobuf.ByteString value) {
+      public Builder setKey(
+          java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         key_ = value;
         bitField0_ |= 0x00000004;
@@ -814,12 +1058,30 @@ public final class RequestProtos {
        * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
        * </pre>
        *
-       * <code>bytes key = 3;</code>
+       * <code>string key = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000004);
         key_ = getDefaultInstance().getKey();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+       * </pre>
+       *
+       * <code>string key = 3;</code>
+       * @param value The bytes for key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKeyBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        key_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -864,6 +1126,70 @@ public final class RequestProtos {
       public Builder clearValue() {
         bitField0_ = (bitField0_ & ~0x00000008);
         value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+
+      private int valueLength_ ;
+      /**
+       * <code>int32 value_length = 5;</code>
+       * @return The valueLength.
+       */
+      @java.lang.Override
+      public int getValueLength() {
+        return valueLength_;
+      }
+      /**
+       * <code>int32 value_length = 5;</code>
+       * @param value The valueLength to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValueLength(int value) {
+        
+        valueLength_ = value;
+        bitField0_ |= 0x00000010;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 value_length = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValueLength() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        valueLength_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int keyLength_ ;
+      /**
+       * <code>int32 key_length = 6;</code>
+       * @return The keyLength.
+       */
+      @java.lang.Override
+      public int getKeyLength() {
+        return keyLength_;
+      }
+      /**
+       * <code>int32 key_length = 6;</code>
+       * @param value The keyLength to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKeyLength(int value) {
+        
+        keyLength_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 key_length = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKeyLength() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        keyLength_ = 0;
         onChanged();
         return this;
       }
@@ -945,11 +1271,12 @@ public final class RequestProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rRequest.proto\"M\n\007Request\022\027\n\006action\030\001 \001" +
-      "(\0162\007.Action\022\r\n\005token\030\002 \001(\014\022\013\n\003key\030\003 \001(\014\022" +
-      "\r\n\005value\030\004 \001(\014*-\n\006Action\022\007\n\003GET\020\000\022\007\n\003SET" +
-      "\020\001\022\007\n\003DEL\020\002\022\010\n\004AUTH\020\003B&\n\025common.parsing." +
-      "protosB\rRequestProtosb\006proto3"
+      "\n\rRequest.proto\"w\n\007Request\022\027\n\006action\030\001 \001" +
+      "(\0162\007.Action\022\r\n\005token\030\002 \001(\t\022\013\n\003key\030\003 \001(\t\022" +
+      "\r\n\005value\030\004 \001(\014\022\024\n\014value_length\030\005 \001(\005\022\022\n\n" +
+      "key_length\030\006 \001(\005*-\n\006Action\022\007\n\003GET\020\000\022\007\n\003S" +
+      "ET\020\001\022\007\n\003DEL\020\002\022\010\n\004AUTH\020\003B&\n\025common.parsin" +
+      "g.protosB\rRequestProtosb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -960,7 +1287,7 @@ public final class RequestProtos {
     internal_static_Request_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Request_descriptor,
-        new java.lang.String[] { "Action", "Token", "Key", "Value", });
+        new java.lang.String[] { "Action", "Token", "Key", "Value", "ValueLength", "KeyLength", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

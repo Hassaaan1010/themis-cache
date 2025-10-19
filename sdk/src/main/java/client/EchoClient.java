@@ -1,10 +1,15 @@
 package client;
 
+// import com.google.protobuf.ByteString;
+
 import client.handler.EchoClientHandler;
-import client.parsing.ByteBufClientCodec;
+// import client.parsing.ByteBufClientCodec;
+import client.parsing.ProtobufClientCodec;
 import common.CommonConstants;
 import common.LogUtil;
 import common.interfaces.Codec;
+import common.parsing.protos.RequestProtos;
+import common.parsing.protos.ResponseProtos;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,13 +17,15 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import models.RequestData;
-import models.ResponseData;
+// import models.RequestData;
+// import models.ResponseData;
 
 public class EchoClient {
 
     private ChannelFuture channelFuture;
     private NioEventLoopGroup workerGroup;
+
+    public String token;
 
     public EchoClient() {
     }
@@ -26,7 +33,8 @@ public class EchoClient {
     public void start() throws Exception {
         try {
             workerGroup = new NioEventLoopGroup();
-            Codec<RequestData, ResponseData> codec = new ByteBufClientCodec();
+            // Codec<RequestData, ResponseData> codec = new ByteBufClientCodec();
+            Codec<RequestProtos.Request, ResponseProtos.Response> codec = new ProtobufClientCodec();
 
             Bootstrap b = new Bootstrap();
             b.group(workerGroup)
@@ -36,6 +44,7 @@ public class EchoClient {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
+                            // .
                             .addLast(codec.newDecoder())
                             .addLast(codec.newEncoder())
                             .addLast(new EchoClientHandler());
@@ -72,4 +81,16 @@ public class EchoClient {
         
         client.start();
     }
+
+    // public static void getKey(String key) {
+        
+    // }
+
+    // public static boolean setKey(String key, Byte[] Value) {
+        
+    // }
+
+    // public static deleteKey(String key) {
+
+    // }
 }
