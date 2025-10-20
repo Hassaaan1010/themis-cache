@@ -1,5 +1,6 @@
 package models;
 
+@Deprecated
 public class ResponseData {
     private int status;
     private int length;

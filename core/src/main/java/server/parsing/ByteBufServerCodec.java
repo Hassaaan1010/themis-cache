@@ -42,7 +42,7 @@ public class ByteBufServerCodec implements Codec<RequestData, ResponseData> {
 
                 data.setLength(input.readInt());
 
-                data.setAction(input.readCharSequence(CommonConstants.ACTION_LENGTH, charset).toString().toUpperCase());
+                data.setAction(input.readCharSequence(CommonConstants.MAX_ACTION_SIZE, charset).toString().toUpperCase());
 
                 CharSequence tempSeq = input.readCharSequence(data.getLength(), charset);
                 data.setMessage(tempSeq.toString());

@@ -1,5 +1,6 @@
 package models;
 
+@Deprecated
 public class RequestData {
     private int length;
     private String message;

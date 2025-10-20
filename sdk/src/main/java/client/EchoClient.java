@@ -1,8 +1,11 @@
 package client;
 
+import client.clientUtils.ErrorInboundHandler;
+
 // import com.google.protobuf.ByteString;
 
 import client.handler.EchoClientHandler;
+import client.handler.SafeResFrameDecoder;
 // import client.parsing.ByteBufClientCodec;
 import client.parsing.ProtobufClientCodec;
 import common.CommonConstants;
@@ -19,6 +22,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 // import models.RequestData;
 // import models.ResponseData;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
 public class EchoClient {
 
@@ -45,9 +49,13 @@ public class EchoClient {
                     public void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
                             // .
+                            // .addLast(new )
+                            .addLast(new SafeResFrameDecoder())
                             .addLast(codec.newDecoder())
+                            .addLast(new ProtobufVarint32LengthFieldPrepender())
                             .addLast(codec.newEncoder())
-                            .addLast(new EchoClientHandler());
+                            .addLast(new EchoClientHandler())
+                            .addLast(new ErrorInboundHandler());
                     }
                 });
 

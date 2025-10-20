@@ -1,23 +1,30 @@
 package server;
 
-
 import common.CommonConstants;
 import common.interfaces.Codec;
 import common.parsing.protos.RequestProtos;
 import common.parsing.protos.ResponseProtos;
+import common.LogUtil;
+
 import db.MongoService;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+// import io.netty.handler.timeout.ReadTimeoutHandler;
+
 // import models.RequestData;
 // import models.ResponseData;
+
 import server.handler.EchoServerHandler;
+import server.handler.ErrorInboundHandler;
+import server.handler.SafeReqFrameDecoder;
 // import server.parsing.ByteBufServerCodec;
 import server.parsing.ProtobufServerCodec;
-import common.LogUtil;
 
 public class EchoServer {
 
@@ -36,7 +43,7 @@ public class EchoServer {
             Class.forName("db.MongoService");
 
             // Initialize Netty
-            
+
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
 
@@ -50,9 +57,13 @@ public class EchoServer {
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             ch.pipeline()
-                                    .addLast(codec.newDecoder())
-                                    .addLast(codec.newEncoder())
-                                    .addLast(new EchoServerHandler());
+                                    // .addLast(new ReadTimeoutHandler(3)) // close inactive connections
+                                    .addLast(new SafeReqFrameDecoder()) // inbound frame decoder
+                                    .addLast(codec.newDecoder()) // inbound protobuf decoder
+                                    .addLast(new ProtobufVarint32LengthFieldPrepender()) // outbound length prepend
+                                    .addLast(codec.newEncoder()) // outbound protobuf encoder
+                                    .addLast(new EchoServerHandler()) // business logic
+                                    .addLast(new ErrorInboundHandler()); // exception handling
                         }
                     });
 
@@ -87,7 +98,7 @@ public class EchoServer {
 
         // Hook for Ctrl+C or SIGTERM
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
-        
+
         server.start();
     }
 }
