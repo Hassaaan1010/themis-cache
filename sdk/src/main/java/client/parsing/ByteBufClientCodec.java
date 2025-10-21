@@ -15,6 +15,7 @@ import io.netty.handler.codec.ReplayingDecoder;
 import models.RequestData;
 import models.ResponseData;
 
+@SuppressWarnings("deprecation")
 public class ByteBufClientCodec implements Codec<RequestData, ResponseData> {
 
     private static Charset charset = CommonConstants.DEFAULT_CHARSET;

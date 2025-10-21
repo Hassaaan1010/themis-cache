@@ -25,11 +25,11 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
             // final String key = "PING";
             RequestProtos.Request req = RequestProtos.Request.newBuilder()
-                    .setAction(RequestProtos.Action.AUTH)
-                    .setKey(tenantId)
-                    .setKeyLength(tenantId.length())
-                    .setValue(ByteString.copyFromUtf8(password))
-                    .setValueLength(password.length())
+                    .setAction(RequestProtos.Action.AUTH) // 1 + 1 feild prefix
+                    .setKey(tenantId) // 24 + 1 + 1 feild prefix
+                    .setKeyLength(tenantId.length()) // 1 + 1 feild prefix
+                    .setValue(ByteString.copyFromUtf8(password)) // 15 + 1 feild prefix
+                    .setValueLength(password.length()) // 1 + 1 feild prefix
                     .build();
             LogUtil.log("Attempting auth from channelActive.");
             

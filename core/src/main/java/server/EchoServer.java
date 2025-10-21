@@ -44,6 +44,7 @@ public class EchoServer {
 
             // Initialize Netty
 
+            // Define number of boss vs worker threads
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
 

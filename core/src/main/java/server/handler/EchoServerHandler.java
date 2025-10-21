@@ -2,19 +2,21 @@ package server.handler;
 
 import java.nio.charset.StandardCharsets;
 
-import org.bson.Document;
-import org.bson.types.ObjectId;
-
 import common.LogUtil;
-import common.parsing.protos.RequestProtos;
-import common.parsing.protos.ResponseProtos;
+import common.parsing.protos.RequestProtos.Request;
+import common.parsing.protos.ResponseProtos.Response;
+import common.parsing.protos.RequestProtos.Action;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import com.mongodb.client.model.Filters;
+import server.controllers.AuthController;
+import server.controllers.BadRequestController;
+import server.controllers.CloseController;
+import server.controllers.DelController;
+import server.controllers.GetController;
+import server.controllers.SetController;
 
-import db.MongoService;
 // import models.RequestData;
 // import models.ResponseData;
 
@@ -40,68 +42,57 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
             LogUtil.log("Reached channel read : ", "Got msg from client ", msg.toString());
-            RequestProtos.Request req;
-            ResponseProtos.Response res = null;
 
-            String message;
-            int status;
+            Request req;
+            Response res = null;
 
             // Check correct format of request
-            if (!(msg instanceof RequestProtos.Request)) {
+            if (!(msg instanceof Request)) {
                 // throw new ChannelException("Request object is of wrong class :" +
                 // msg.getClass());
-                status = 400;
-                message = "Request object is of wrong class :" + msg.getClass();
+                res = BadRequestController.invalidRequestClass();
+
             } else {
                 // Cast to Request object from deserialized msg
-                req = (RequestProtos.Request) msg;
+                req = (Request) msg;
 
                 LogUtil.log("Request received successfully :", "Request", req, "Action:", req.getAction(), "Key: ",
                         req.getKey());
 
-                // if Auth type request
                 switch (req.getAction()) {
-                    case RequestProtos.Action.AUTH:
+                    case Action.GET:
+                        GetController.get(ctx, req);
+                        return;
 
-                        String tenantId = req.getKey();
-                        String password = req.getValue().toStringUtf8();
+                    case Action.SET:
+                        SetController.set(ctx, req);
+                        return;
 
-                        Document tenantDocument = MongoService.UserCollection.find(Filters.eq("_id", new ObjectId(tenantId))).first();
+                    case Action.DEL:
+                        DelController.delete(ctx, req);
+                        return;
 
-                        // Ceck if failed auth against record from db
-                        if (tenantDocument == null || !tenantDocument.getString("password").equals(password)) {
-                            message = "Auth Failed. Check password.";
-                            status = 401;
-                            if (tenantDocument == null) {
-                                status = 404;
-                                message = "Tenant not found";
-                            }
-
-                        } else { // Auth success
-                            message = "Auth Success. Client can send messages now.";
-                            status = 200;
+                    case Action.AUTH:
+                        res = AuthController.authenticate(req);
+                        ctx.writeAndFlush(res);
+                        if (res.getStatus() >= 400) {
+                            ctx.close();
                         }
-                        break;
+                        return;
 
+                    case Action.CLOSE:
+                        res = CloseController.close(req);
+                        ctx.writeAndFlush(res);
+                        if (res.getStatus() == 200){
+                            ctx.close();
+                        }
+                        return;
+                        
                     default:
-                        status = 500;
-                        message = "Unexpected server error in channelHandling.";
-                        break;
+                        res = BadRequestController.invalidRequestMethod();
+                        ctx.writeAndFlush(res);
+                        return;
                 }
-
-            }
-            ;
-
-            res = ResponseProtos.Response.newBuilder()
-                    .setStatus(status)
-                    .setMessage(message)
-                    .setLength(message.length())
-                    .build();
-
-            ctx.writeAndFlush(res);
-
-            if (status == 404 || status == 401) {
-                ctx.close();
             }
 
         } catch (

@@ -57,6 +57,8 @@ public class SafeResFrameDecoder extends ByteToMessageDecoder {
             out.add(res);
         }
 
+        System.out.println("Frame size of Res: " + frameLength);
+
         // Now slice the frame and pass it downstream
         ByteBuf frame = in.readRetainedSlice(frameLength);
         out.add(frame);

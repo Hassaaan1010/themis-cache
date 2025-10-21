@@ -9,13 +9,17 @@ enum Action {
     SET = 1;
     DEL = 2;
     AUTH = 3;
+    CLOSE = 4;
 }
 
 message Request {
     Action action = 1;
-    string token = 2; // [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-    string key = 3; // [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-    bytes value = 4;  // [(validate.rules).bytes = {min_len: 8, max_len: 64}];
+    string token = 2;
+    string key = 3;
+    bytes value = 4; 
     int32 value_length = 5;
     int32 key_length = 6;
+    int32 options = 5;
 }
+
+// Every change in this file must revise ../../CommonConstants.java 

@@ -18,6 +18,7 @@ import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToByteEncoder;
 import models.ResponseData;
 
+@SuppressWarnings("deprecation")
 public class ByteBufServerCodec implements Codec<RequestData, ResponseData> {
     private static final Charset charset = CommonConstants.DEFAULT_CHARSET;
 

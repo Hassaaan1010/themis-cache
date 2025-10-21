@@ -60,6 +60,8 @@ public class SafeReqFrameDecoder extends ProtobufVarint32FrameDecoder {
 
         }
 
+        System.out.println("Frame size of Req: " + frameLength);
+
         // Defensive check: if declared size > max
         if (in.readableBytes() > maxFrameSize) {
             in.clear();

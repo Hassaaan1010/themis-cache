@@ -10,7 +10,7 @@ public class CommonConstants {
     public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
     public static final String SERVER_HOST = "localhost";
     public static final int BYTE_SIZE = 1024 * 1024;
-    public static final int INT_MAX = 4; // int32 fields are 4 bytes max
+    public static final int INT_MAX = 5; // int32 fields are 4 bytes max
     public static final int INT_MIN = 1; // int32 may use 1 byte for 0-127
     public static final int PAYLOAD_LIMIT = 32; // MB
     public static final int FRAME_LENGTH_PREPEND = 4;
@@ -39,6 +39,10 @@ public class CommonConstants {
     public static final int MAX_VALUE_LENGTH_SIZE = INT_MAX;
     public static final int MIN_VALUE_LENGTH_SIZE = INT_MIN;
 
+    // Options length
+    public static final int MAX_OPTIONS_SIZE = INT_MAX;
+    public static final int MIN_OPTIONS_SIZE = INT_MIN;
+
     public static final int MAX_REQ_SIZE = 0 +
             FRAME_LENGTH_PREPEND +
             MAX_ACTION_SIZE +
@@ -46,7 +50,8 @@ public class CommonConstants {
             MAX_KEY_SIZE + 1 +
             MAX_KEY_LENGTH_SIZE +
             MAX_VALUE_SIZE +
-            MAX_VALUE_LENGTH_SIZE;
+            MAX_VALUE_LENGTH_SIZE + 
+            MAX_OPTIONS_SIZE;
     public static final int MIN_REQ_SIZE = 0 +
             FRAME_LENGTH_PREPEND +
             MAX_ACTION_SIZE +
@@ -54,7 +59,8 @@ public class CommonConstants {
             MIN_KEY_SIZE +
             MIN_KEY_LENGTH_SIZE +
             MIN_VALUE_SIZE +
-            MIN_VALUE_LENGTH_SIZE;
+            MIN_VALUE_LENGTH_SIZE + 
+            MIN_OPTIONS_SIZE;
 
     // RESPONSE CONSTRAINTS. Not needed
     public static final int MAX_STATUS_SIZE = INT_MAX;
@@ -78,9 +84,9 @@ public class CommonConstants {
             
     public static final int MIN_RES_SIZE = 0 + 
             FRAME_LENGTH_PREPEND + 
-            1 +
-            2 + 
-            1 + 
-            0;
+            1 + // varInt status
+            2 + // 1 + 1 min String message
+            1 + // varInt length
+            0;  // value
 
 }

@@ -10,3 +10,5 @@ message Response {
     int32 length = 3;
     bytes value = 4;
 }
+
+// Every change in this file must revise ../../CommonConstants.java 

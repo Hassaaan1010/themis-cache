@@ -35,6 +35,10 @@ public final class RequestProtos {
      * <code>AUTH = 3;</code>
      */
     AUTH(3),
+    /**
+     * <code>CLOSE = 4;</code>
+     */
+    CLOSE(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -54,6 +58,10 @@ public final class RequestProtos {
      * <code>AUTH = 3;</code>
      */
     public static final int AUTH_VALUE = 3;
+    /**
+     * <code>CLOSE = 4;</code>
+     */
+    public static final int CLOSE_VALUE = 4;
 
 
     public final int getNumber() {
@@ -84,6 +92,7 @@ public final class RequestProtos {
         case 1: return SET;
         case 2: return DEL;
         case 3: return AUTH;
+        case 4: return CLOSE;
         default: return null;
       }
     }
@@ -156,19 +165,11 @@ public final class RequestProtos {
     common.parsing.protos.RequestProtos.Action getAction();
 
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string token = 2;</code>
      * @return The token.
      */
     java.lang.String getToken();
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string token = 2;</code>
      * @return The bytes for token.
      */
@@ -176,19 +177,11 @@ public final class RequestProtos {
         getTokenBytes();
 
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string key = 3;</code>
      * @return The key.
      */
     java.lang.String getKey();
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string key = 3;</code>
      * @return The bytes for key.
      */
@@ -196,10 +189,6 @@ public final class RequestProtos {
         getKeyBytes();
 
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>bytes value = 4;</code>
      * @return The value.
      */
@@ -216,6 +205,12 @@ public final class RequestProtos {
      * @return The keyLength.
      */
     int getKeyLength();
+
+    /**
+     * <code>int32 options = 7;</code>
+     * @return The options.
+     */
+    int getOptions();
   }
   /**
    * Protobuf type {@code Request}
@@ -283,10 +278,6 @@ public final class RequestProtos {
     @SuppressWarnings("serial")
     private volatile java.lang.Object token_ = "";
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string token = 2;</code>
      * @return The token.
      */
@@ -304,10 +295,6 @@ public final class RequestProtos {
       }
     }
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string token = 2;</code>
      * @return The bytes for token.
      */
@@ -330,10 +317,6 @@ public final class RequestProtos {
     @SuppressWarnings("serial")
     private volatile java.lang.Object key_ = "";
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string key = 3;</code>
      * @return The key.
      */
@@ -351,10 +334,6 @@ public final class RequestProtos {
       }
     }
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>string key = 3;</code>
      * @return The bytes for key.
      */
@@ -376,10 +355,6 @@ public final class RequestProtos {
     public static final int VALUE_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
     /**
-     * <pre>
-     * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-     * </pre>
-     *
      * <code>bytes value = 4;</code>
      * @return The value.
      */
@@ -408,6 +383,17 @@ public final class RequestProtos {
     @java.lang.Override
     public int getKeyLength() {
       return keyLength_;
+    }
+
+    public static final int OPTIONS_FIELD_NUMBER = 7;
+    private int options_ = 0;
+    /**
+     * <code>int32 options = 7;</code>
+     * @return The options.
+     */
+    @java.lang.Override
+    public int getOptions() {
+      return options_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -442,6 +428,9 @@ public final class RequestProtos {
       if (keyLength_ != 0) {
         output.writeInt32(6, keyLength_);
       }
+      if (options_ != 0) {
+        output.writeInt32(7, options_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -473,6 +462,10 @@ public final class RequestProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(6, keyLength_);
       }
+      if (options_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, options_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -499,6 +492,8 @@ public final class RequestProtos {
           != other.getValueLength()) return false;
       if (getKeyLength()
           != other.getKeyLength()) return false;
+      if (getOptions()
+          != other.getOptions()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -522,6 +517,8 @@ public final class RequestProtos {
       hash = (53 * hash) + getValueLength();
       hash = (37 * hash) + KEY_LENGTH_FIELD_NUMBER;
       hash = (53 * hash) + getKeyLength();
+      hash = (37 * hash) + OPTIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getOptions();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -657,6 +654,7 @@ public final class RequestProtos {
         value_ = com.google.protobuf.ByteString.EMPTY;
         valueLength_ = 0;
         keyLength_ = 0;
+        options_ = 0;
         return this;
       }
 
@@ -707,6 +705,9 @@ public final class RequestProtos {
         }
         if (((from_bitField0_ & 0x00000020) != 0)) {
           result.keyLength_ = keyLength_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.options_ = options_;
         }
       }
 
@@ -776,6 +777,9 @@ public final class RequestProtos {
         if (other.getKeyLength() != 0) {
           setKeyLength(other.getKeyLength());
         }
+        if (other.getOptions() != 0) {
+          setOptions(other.getOptions());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -832,6 +836,11 @@ public final class RequestProtos {
                 bitField0_ |= 0x00000020;
                 break;
               } // case 48
+              case 56: {
+                options_ = input.readInt32();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -904,10 +913,6 @@ public final class RequestProtos {
 
       private java.lang.Object token_ = "";
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string token = 2;</code>
        * @return The token.
        */
@@ -924,10 +929,6 @@ public final class RequestProtos {
         }
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string token = 2;</code>
        * @return The bytes for token.
        */
@@ -945,10 +946,6 @@ public final class RequestProtos {
         }
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string token = 2;</code>
        * @param value The token to set.
        * @return This builder for chaining.
@@ -962,10 +959,6 @@ public final class RequestProtos {
         return this;
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string token = 2;</code>
        * @return This builder for chaining.
        */
@@ -976,10 +969,6 @@ public final class RequestProtos {
         return this;
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string token = 2;</code>
        * @param value The bytes for token to set.
        * @return This builder for chaining.
@@ -996,10 +985,6 @@ public final class RequestProtos {
 
       private java.lang.Object key_ = "";
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string key = 3;</code>
        * @return The key.
        */
@@ -1016,10 +1001,6 @@ public final class RequestProtos {
         }
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string key = 3;</code>
        * @return The bytes for key.
        */
@@ -1037,10 +1018,6 @@ public final class RequestProtos {
         }
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string key = 3;</code>
        * @param value The key to set.
        * @return This builder for chaining.
@@ -1054,10 +1031,6 @@ public final class RequestProtos {
         return this;
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string key = 3;</code>
        * @return This builder for chaining.
        */
@@ -1068,10 +1041,6 @@ public final class RequestProtos {
         return this;
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>string key = 3;</code>
        * @param value The bytes for key to set.
        * @return This builder for chaining.
@@ -1088,10 +1057,6 @@ public final class RequestProtos {
 
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>bytes value = 4;</code>
        * @return The value.
        */
@@ -1100,10 +1065,6 @@ public final class RequestProtos {
         return value_;
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>bytes value = 4;</code>
        * @param value The value to set.
        * @return This builder for chaining.
@@ -1116,10 +1077,6 @@ public final class RequestProtos {
         return this;
       }
       /**
-       * <pre>
-       * [(validate.rules).bytes = {min_len: 8, max_len: 64}];
-       * </pre>
-       *
        * <code>bytes value = 4;</code>
        * @return This builder for chaining.
        */
@@ -1190,6 +1147,38 @@ public final class RequestProtos {
       public Builder clearKeyLength() {
         bitField0_ = (bitField0_ & ~0x00000020);
         keyLength_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int options_ ;
+      /**
+       * <code>int32 options = 7;</code>
+       * @return The options.
+       */
+      @java.lang.Override
+      public int getOptions() {
+        return options_;
+      }
+      /**
+       * <code>int32 options = 7;</code>
+       * @param value The options to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOptions(int value) {
+        
+        options_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 options = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOptions() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        options_ = 0;
         onChanged();
         return this;
       }
@@ -1271,12 +1260,13 @@ public final class RequestProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rRequest.proto\"w\n\007Request\022\027\n\006action\030\001 \001" +
-      "(\0162\007.Action\022\r\n\005token\030\002 \001(\t\022\013\n\003key\030\003 \001(\t\022" +
-      "\r\n\005value\030\004 \001(\014\022\024\n\014value_length\030\005 \001(\005\022\022\n\n" +
-      "key_length\030\006 \001(\005*-\n\006Action\022\007\n\003GET\020\000\022\007\n\003S" +
-      "ET\020\001\022\007\n\003DEL\020\002\022\010\n\004AUTH\020\003B&\n\025common.parsin" +
-      "g.protosB\rRequestProtosb\006proto3"
+      "\n\rRequest.proto\"\210\001\n\007Request\022\027\n\006action\030\001 " +
+      "\001(\0162\007.Action\022\r\n\005token\030\002 \001(\t\022\013\n\003key\030\003 \001(\t" +
+      "\022\r\n\005value\030\004 \001(\014\022\024\n\014value_length\030\005 \001(\005\022\022\n" +
+      "\nkey_length\030\006 \001(\005\022\017\n\007options\030\007 \001(\005*8\n\006Ac" +
+      "tion\022\007\n\003GET\020\000\022\007\n\003SET\020\001\022\007\n\003DEL\020\002\022\010\n\004AUTH\020" +
+      "\003\022\t\n\005CLOSE\020\004B&\n\025common.parsing.protosB\rR" +
+      "equestProtosb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1287,7 +1277,7 @@ public final class RequestProtos {
     internal_static_Request_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Request_descriptor,
-        new java.lang.String[] { "Action", "Token", "Key", "Value", "ValueLength", "KeyLength", });
+        new java.lang.String[] { "Action", "Token", "Key", "Value", "ValueLength", "KeyLength", "Options", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
