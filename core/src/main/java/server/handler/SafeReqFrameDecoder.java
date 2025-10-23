@@ -3,6 +3,7 @@ package server.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import server.EchoServer;
 // import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import server.serverUtils.EchoException;
 
@@ -22,7 +23,7 @@ public class SafeReqFrameDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        LogUtil.log("Did we reach the frame length prepend safe decoder?");
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("Did we reach the frame length prepend safe decoder?");
         
         // Mark reader index so we can reset if needed
         in.markReaderIndex();
@@ -51,7 +52,7 @@ public class SafeReqFrameDecoder extends ByteToMessageDecoder {
                 // Malformed varint - too many bytes
                 in.clear();
                 // Likely tampering with SDK internals. Close connection. 
-                LogUtil.log("Malformed varint32 frame length. Closing connection");
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Malformed varint32 frame length. Closing connection");
                 ctx.close();
                 return;
             }
@@ -66,12 +67,11 @@ public class SafeReqFrameDecoder extends ByteToMessageDecoder {
         if (length > maxFrameSize) {
             in.clear();
             // Likely tampering with SDK internals. Close connection. 
-                LogUtil.log("Request object was too large. Length: " + length + " Closing connection.");
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Request object was too large. Length: " + length + " Closing connection.");
                 ctx.close();
                 return;
         }
         
-        System.out.println("Frame size of Req: " + length);
         
         // Check if we have enough bytes for the full frame
         if (in.readableBytes() < length) {
@@ -79,6 +79,7 @@ public class SafeReqFrameDecoder extends ByteToMessageDecoder {
             in.resetReaderIndex();
             return;
         }
+        System.out.println("Frame size of Req: " + length);
         
         // Success - extract the frame (WITHOUT the length prefix)
         ByteBuf frame = in.readRetainedSlice(length);

@@ -12,6 +12,7 @@ import common.LogUtil;
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
 import db.MongoService;
+import server.EchoServer;
 import server.controllers.helpers.ResponseBuilders;
 
 public class AuthController {
@@ -45,7 +46,7 @@ public class AuthController {
             
             validTokens.add(message);
             
-            LogUtil.log("Authentication worked. Your token was added", "Token",message, "ValidTokens", validTokens );
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Authentication worked. Your token was added", "Token",message, "ValidTokens", validTokens );
         }
 
         Response res = ResponseBuilders.makeAuthResponse(status, message, req.getRequestId());

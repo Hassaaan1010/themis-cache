@@ -8,7 +8,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import common.LogUtil;
-import commonCore.EnvConfig;;
+import commonCore.EnvConfig;
+import server.EchoServer;;
 
 public class MongoService {
 
@@ -21,12 +22,12 @@ public class MongoService {
         db = client.getDatabase(EnvConfig.DB_NAME);
 
         
-        LogUtil.log("✅ MongoDB Initialized.");
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ MongoDB Initialized.");
 
 
         // collections
         UserCollection = db.getCollection("Users");
-        LogUtil.log("Users collection initialized successfully.");
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("Users collection initialized successfully.");
     }
 
 
@@ -36,7 +37,7 @@ public class MongoService {
 
     public static void closeClient() {
         client.close();
-        LogUtil.log("MongoDB closed gracefully.");
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("MongoDB closed gracefully.");
     }
 
     private MongoService() {};

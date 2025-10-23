@@ -27,13 +27,13 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
             // Request req = RequestUtils.makeAuthRequest();
 
-            // LogUtil.log("Attempting auth from channelActive.");
+            // if (EchoClient.DEBUG_CLIENT) LogUtil.log("Attempting auth from channelActive.");
 
             // ctx.writeAndFlush(req);
 
             // return;
         } catch (Exception e) {
-            LogUtil.log("Error in EchoClientHandler ", "Error", e);
+            if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error in EchoClientHandler ", "Error", e);
             // throw new ChannelException("Error occured in EchoClientHandler");
         }
     }
@@ -46,8 +46,8 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
             if (msg instanceof Response) {
                 res = (Response) msg;
                 // Error handling. Possibly decrypt and decompress here
-                LogUtil.log("ChannelRead received.", "Response Id", res.getResponseId());
-                LogUtil.log("Response received: ", "Res:",res,"ResponseId",res.getResponseId());
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("ChannelRead received.", "Response Id", res.getResponseId());
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Response received: ","ResponseId",res.getResponseId());
                 client.completeFuture(res);
 
 
@@ -56,7 +56,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
             }
 
         } catch (Exception e) {
-            LogUtil.log("Error in Client channelRead:", "Response data", (Response) msg);
+            if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error in Client channelRead:", "Response data", (Response) msg);
             ctx.close();
         }
     }

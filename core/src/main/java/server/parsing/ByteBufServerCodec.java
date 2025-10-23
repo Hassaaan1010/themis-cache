@@ -17,6 +17,7 @@ import models.RequestData;
 import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToByteEncoder;
 import models.ResponseData;
+import server.EchoServer;
 
 @SuppressWarnings("deprecation")
 public class ByteBufServerCodec implements Codec<RequestData, ResponseData> {
@@ -51,10 +52,10 @@ public class ByteBufServerCodec implements Codec<RequestData, ResponseData> {
 
                 output.add(data);
 
-                LogUtil.log("Request data created :", data.toString());
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Request data created :", data.toString());
 
             } catch (Exception e) {
-                LogUtil.log("Error occured while decoding exception",
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Error occured while decoding exception",
                         "input", input,
                         "data", data.toString(),
                         "Error", e);
@@ -70,12 +71,12 @@ public class ByteBufServerCodec implements Codec<RequestData, ResponseData> {
                 out.writeInt(msg.getStatus());
                 out.writeInt(msg.getLength());
                 out.writeCharSequence(msg.getData(), charset);
-                LogUtil.log("Response:",
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Response:",
                         "msg", msg,
                         "out", out);
 
             } catch (Exception e) {
-                LogUtil.log("Error occured while encoding Response Data object:",
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Error occured while encoding Response Data object:",
                         "msg", msg,
                         "out", out,
                         "Error", e);

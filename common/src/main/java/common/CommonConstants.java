@@ -7,22 +7,34 @@ public class CommonConstants {
         }
 
         public static final int SERVER_PORT = 8080;
-        public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
         public static final String SERVER_HOST = "localhost";
+
+        // ========================
+        // TIMEOUT CONSTANTS
+        // ========================
+        public static final long GET_REQUEST_TIMEOUT = 100;
+        public static final long SET_REQUEST_TIMEOUT = 1; // TODO: Potentially multiplied by a factor of length of payload. 
+        public static final long DEL_REQUEST_TIMEOUT = 5;
+        public static final long AUTH_REQUEST_TIMEOUT = 500; // DB read operation.
+
+
+
+        public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
         // ========================
         // OPTIONS CONSTANTS
         // ========================
-        public static final int encryptOption = 1; // 0000 0001
-        public static final int compressOption = 2; // 0000 0010
+        public static final int encryptOption = 1;              // 0000 0001
+        public static final int compressOption = 2;             // 0000 0010
+        public static final int largePayloadOption = 3;         // 0000 0011
 
         // ========================
         // BASIC CONSTANTS
         // ========================
-        public static final int BYTE_SIZE = 1024 * 1024;
+        public static final int MEGA_BYTE_SIZE = 1000 * 1000;
         public static final int INT_MAX = 5; // int32 varint: max 5 bytes for large values
         public static final int INT_MIN = 1; // int32 varint: min 1 byte for 0-127
-        public static final int PAYLOAD_LIMIT = 32; // MB
+        public static final int PAYLOAD_LIMIT = 101; // MB
         public static final int VARINT_TAG_SIZE = 1; // field tag is 1 byte for field numbers 1-15
 
         // ========================
@@ -46,7 +58,7 @@ public class CommonConstants {
 
         // Value (bytes) - field 4 - OPTIONAL
         // Protobuf: tag (1 byte) + length varint (max 5 bytes for 32MB) + data
-        public static final int MAX_VALUE_SIZE = VARINT_TAG_SIZE + INT_MAX + (BYTE_SIZE * PAYLOAD_LIMIT);
+        public static final int MAX_VALUE_SIZE = VARINT_TAG_SIZE + INT_MAX + (MEGA_BYTE_SIZE * PAYLOAD_LIMIT);
         public static final int MIN_VALUE_SIZE = 0; // optional, may not exist
 
         // Options (int32) - field 5 - OPTIONAL but could be 0
@@ -89,7 +101,7 @@ public class CommonConstants {
 
         // Value (bytes) - field 3 - OPTIONAL
         // Protobuf: tag (1 byte) + length varint + data
-        public static final int MAX_VALUE_RES_SIZE = VARINT_TAG_SIZE + INT_MAX + (BYTE_SIZE * PAYLOAD_LIMIT);
+        public static final int MAX_VALUE_RES_SIZE = VARINT_TAG_SIZE + INT_MAX + (MEGA_BYTE_SIZE * PAYLOAD_LIMIT);
         public static final int MIN_VALUE_RES_SIZE = 0; // optional
 
         // ResponseId (int32) - field 4
@@ -107,7 +119,7 @@ public class CommonConstants {
                         MIN_MESSAGE_SIZE +
                         MIN_RESPONSE_ID_SIZE; // value is optional
 
-        public static final long REQUEST_TIMEOUT = 20_000_000;
+        
 
         {
 

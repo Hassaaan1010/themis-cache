@@ -1,6 +1,7 @@
 package client.handler;
 
 
+import client.EchoClient;
 import common.LogUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -15,14 +16,14 @@ public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws NullPointerException {
         
-        LogUtil.log("Error", cause.getMessage());
+        if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error", cause.getMessage());
 
         cause.printStackTrace();
 
         status = 500;
         message = "Internal server error. Possibly recieved invalid response.";
         
-        LogUtil.log("Error was thrown without new EchoException(int status, String message).", "Error", cause.getMessage());
+        if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error was thrown without new EchoException(int status, String message).", "Error", cause.getMessage());
         cause.printStackTrace();
     
 

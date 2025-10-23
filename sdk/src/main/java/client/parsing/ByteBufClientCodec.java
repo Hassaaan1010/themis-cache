@@ -3,6 +3,7 @@ package client.parsing;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import client.EchoClient;
 import common.CommonConstants;
 import common.LogUtil;
 import common.interfaces.Codec;
@@ -38,10 +39,10 @@ public class ByteBufClientCodec implements Codec<RequestData, ResponseData> {
                 out.writeInt(msg.getLength());
                 out.writeCharSequence(msg.getAction(), charset);
                 out.writeCharSequence(msg.getMessage(), charset);
-                LogUtil.log("CLIENT: log from ReqDataEncoder", "ReqData", msg, "Output", out);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("CLIENT: log from ReqDataEncoder", "ReqData", msg, "Output", out);
 
             } catch (Exception e) {
-                LogUtil.log("Error in Client log from ReqDataEncoder", "RequestData", msg, "Output", out, "Error", e);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error in Client log from ReqDataEncoder", "RequestData", msg, "Output", out, "Error", e);
                 // throw new UnsupportedOperationException("Unimplemented method 'encode'");
             }
         }
@@ -62,10 +63,10 @@ public class ByteBufClientCodec implements Codec<RequestData, ResponseData> {
 
                 out.add(data);
 
-                LogUtil.log(null, "Response Decoded", data);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log(null, "Response Decoded", data);
 
             } catch (Exception e) {
-                LogUtil.log("Error In ResponseDataDecoder:", "ResponseData", data, "Error", e);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error In ResponseDataDecoder:", "ResponseData", data, "Error", e);
                 // throw new UnsupportedOperationException("Unimplemented method 'decode'");
             }
         }

@@ -39,6 +39,8 @@ public class EchoClient {
 
     private ChannelFuture channelFuture;
     private NioEventLoopGroup workerGroup;
+    public static final boolean DEBUG_CLIENT = true;
+
     private Bootstrap b;
 
     private Channel channel;
@@ -72,10 +74,12 @@ public class EchoClient {
                                     .addLast(new ErrorInboundHandler());
                         }
                     });
-            LogUtil.log("Client instantiated.");
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Client instantiated.");
 
         } catch (Exception e) {
-            LogUtil.log("Error initializing EchoClient.", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error initializing EchoClient.", "Error", e);
             System.exit(1);
         }
     }
@@ -91,12 +95,14 @@ public class EchoClient {
 
             // Non-blocking: get notified when channel closes
             this.channel.closeFuture().addListener((_ -> {
-                LogUtil.log("Channel closed, cleaning up...");
+                if (EchoClient.DEBUG_CLIENT)
+                    LogUtil.log("Channel closed, cleaning up...");
                 workerGroup.shutdownGracefully();
             }));
 
         } catch (Exception e) {
-            LogUtil.log("Error in Echo Client : ", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error in Echo Client : ", "Error", e);
             workerGroup.shutdownGracefully();
         }
     }
@@ -115,7 +121,8 @@ public class EchoClient {
             }
 
         } catch (Exception e) {
-            LogUtil.log("Error while shutting down.", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error while shutting down.", "Error", e);
             System.exit(1);
         }
 
@@ -144,7 +151,8 @@ public class EchoClient {
     private final AtomicInteger atomicIdGenerator = new AtomicInteger();
 
     public void completeFuture(Response res) {
-        LogUtil.log("Completing future.", "Response", res, "ResponseId",res.getResponseId());
+        if (EchoClient.DEBUG_CLIENT)
+            LogUtil.log("Completing future.", "ResponseId", res.getResponseId());
         CompletableFuture<Response> future = pendingRequests.remove(res.getResponseId());
         if (future != null) {
             future.complete(res);
@@ -154,9 +162,10 @@ public class EchoClient {
     /*
      * Successful get returns 200
      */
-    public Response getKey(String key) throws Exception {
+    public Response getKey(String key, boolean bigPayload, boolean largePayload) throws Exception {
         Integer requestId = atomicIdGenerator.getAndIncrement();
-        LogUtil.log("Request GET generated.", "Id", requestId);
+        if (EchoClient.DEBUG_CLIENT)
+            LogUtil.log("Request GET generated.", "Id", requestId);
 
         CompletableFuture<Response> future = new CompletableFuture<>();
 
@@ -164,18 +173,27 @@ public class EchoClient {
         Response getResponse;
         pendingRequests.put(requestId, future);
 
+        int timeoutCoefficient = 1;
+        if (bigPayload && !largePayload) {
+            timeoutCoefficient = 10;
+        } else if (largePayload && !bigPayload) {
+            timeoutCoefficient = 100;
+        }
         try {
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("log timeout", "Timeout duration: ", CommonConstants.GET_REQUEST_TIMEOUT);
 
             CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
                     RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
-                    CommonConstants.REQUEST_TIMEOUT,
+                    CommonConstants.GET_REQUEST_TIMEOUT * timeoutCoefficient,
                     TimeUnit.MILLISECONDS);
 
             channel.writeAndFlush(req);
 
             getResponse = futureWithTimeout.get();
         } catch (Exception e) {
-            LogUtil.log("Error occured while trying to get key from cache server.\n", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error occured while trying to get key from cache server.\n", "Error", e);
             getResponse = RequestUtils.makeUpErrorResponse(500, "Failed to get key.", requestId);
 
         } finally {
@@ -201,31 +219,40 @@ public class EchoClient {
 
         // Request handle
         Integer requestId = atomicIdGenerator.getAndIncrement();
-        LogUtil.log("Request SET generated.", "Id", requestId);
+        if (EchoClient.DEBUG_CLIENT)
+            LogUtil.log("Request SET generated.", "Id", requestId);
 
         CompletableFuture<Response> future = new CompletableFuture<>();
 
         pendingRequests.put(requestId, future);
 
         int tempReqId = (int) requestId;
-        LogUtil.log("SET method creating request.","Request id used:", requestId, "Request id had it been int:", tempReqId );
+        if (EchoClient.DEBUG_CLIENT)
+            LogUtil.log("SET method creating request.", "Request id used:", requestId, "Request id had it been int:",
+                    tempReqId);
         Request req = RequestUtils.makeSetRequest(token, key, value, options, requestId);
         Response setResponse;
 
+        int timeoutCoefficient = Math.floorDiv(req.getValue().size(), 1024); // 5 ms / kb
+
         try {
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("log timeout", "Timeout duration: ", CommonConstants.SET_REQUEST_TIMEOUT);
 
             CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
                     RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
-                    CommonConstants.REQUEST_TIMEOUT,
+                    CommonConstants.SET_REQUEST_TIMEOUT * timeoutCoefficient,
                     TimeUnit.MILLISECONDS);
 
-            LogUtil.log("SET Request was flushed. ", "Request id", req.getRequestId());
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("SET Request was flushed. ", "Request id", req.getRequestId());
             channel.writeAndFlush(req);
 
             setResponse = futureWithTimeout.get();
 
         } catch (Exception e) {
-            LogUtil.log("Error occured while trying to set key to cache server.\n", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error occured while trying to set key to cache server.\n", "Error", e);
             setResponse = RequestUtils.makeUpErrorResponse(500, "Failed to set key.", requestId);
         } finally {
             pendingRequests.remove(requestId);
@@ -240,7 +267,8 @@ public class EchoClient {
      */
     public Response deleteKey(String key) {
         Integer requestId = atomicIdGenerator.getAndIncrement();
-        LogUtil.log("Request DEL generated.", "Id", requestId);
+        if (EchoClient.DEBUG_CLIENT)
+            LogUtil.log("Request DEL generated.", "Id", requestId);
 
         CompletableFuture<Response> future = new CompletableFuture<>();
         pendingRequests.put(requestId, future);
@@ -249,9 +277,12 @@ public class EchoClient {
         Response deleteResponse;
 
         try {
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("log timeout", "Timeout duration: ", CommonConstants.DEL_REQUEST_TIMEOUT);
+
             CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
                     RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
-                    CommonConstants.REQUEST_TIMEOUT,
+                    CommonConstants.DEL_REQUEST_TIMEOUT,
                     TimeUnit.MILLISECONDS);
 
             channel.writeAndFlush(req);
@@ -259,7 +290,8 @@ public class EchoClient {
             deleteResponse = futureWithTimeout.get();
 
         } catch (Exception e) {
-            LogUtil.log("Error occured while trying to set key to cache server.\n", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error occured while trying to set key to cache server.\n", "Error", e);
             deleteResponse = RequestUtils.makeUpErrorResponse(500, "Failed to delete key.", requestId);
         } finally {
             pendingRequests.remove(requestId);
@@ -273,7 +305,8 @@ public class EchoClient {
      */
     public Response authenticate() {
         Integer requestId = atomicIdGenerator.getAndIncrement();
-        LogUtil.log("Request AUTH generated.", "Id", requestId);
+        if (EchoClient.DEBUG_CLIENT)
+            LogUtil.log("Request AUTH generated.", "Id", requestId);
         // Add listner to awaited address
         CompletableFuture<Response> future = new CompletableFuture<>();
 
@@ -283,15 +316,15 @@ public class EchoClient {
         Response authResponse;
 
         try {
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("log timeout", "Timeout duration: ", CommonConstants.AUTH_REQUEST_TIMEOUT);
 
             // Link additional listner to address with a default response if address doesn't
             // receive valid response until timeout.
             CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
                     RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
-                    CommonConstants.REQUEST_TIMEOUT,
+                    CommonConstants.AUTH_REQUEST_TIMEOUT,
                     TimeUnit.MILLISECONDS);
-
-            LogUtil.log("log timeout","Timeout duration: ",CommonConstants.REQUEST_TIMEOUT);
 
             channel.writeAndFlush(req);
 
@@ -304,7 +337,8 @@ public class EchoClient {
 
         } catch (Exception e) {
             // TODO: handle exception
-            LogUtil.log("Error occured while trying to authenticate.\n", "Error", e);
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Error occured while trying to authenticate.\n", "Error", e);
             authResponse = RequestUtils.makeUpErrorResponse(500, "Failed to authenticate.", requestId);
         } finally {
             pendingRequests.remove(requestId);

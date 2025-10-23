@@ -13,6 +13,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import server.EchoServer;
 import server.controllers.AuthController;
 import server.controllers.BadRequestController;
 import server.controllers.CloseController;
@@ -46,7 +47,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
-            LogUtil.log("Reached channel read.");
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Reached channel read.");
 
             Request req;
             Response res = null;
@@ -56,12 +57,12 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                 // throw new ChannelException("Request object is of wrong class :" +
                 
                 // res = BadRequestController.invalidRequestClass(Request.newBuilder().set);
-                LogUtil.log("Bad request send. Could not be casted to Request type.");
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Bad request send. Could not be casted to Request type.");
             } else {
                 // Cast to Request object from deserialized msg
                 req = (Request) msg;
 
-                LogUtil.log("Request received successfully :", "Request", req, "Action:", req.getAction(), "Key: ",
+                if (EchoServer.DEBUG_SERVER) LogUtil.log("Request received successfully :", "Request", req, "Action:", req.getAction(), "Key: ",
                         req.getKey());
 
                 switch (req.getAction()) {
@@ -105,7 +106,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         } catch (
 
         Exception e) {
-            LogUtil.log("Channel read error:", "Error", e);
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Channel read error:", "Error", e);
         }
     }
 

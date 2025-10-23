@@ -2,6 +2,9 @@ package instance;
 
 import com.google.protobuf.ByteString;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import client.EchoClient;
 import common.LogUtil;
 import common.parsing.protos.ResponseProtos.Response;
@@ -15,15 +18,15 @@ public class Instance {
             cacheClient.start();
 
 
-            LogUtil.log("Sending Auth");
+            if (EchoClient.DEBUG_CLIENT) LogUtil.log("Sending Auth");
             Response authResponse = cacheClient.authenticate();
 
-            // LogUtil.log("Receieved Auth", "Auth response", authResponse);
+            // if (EchoClient.DEBUG_CLIENT) LogUtil.log("Receieved Auth", "Auth response", authResponse);
 
             if (authResponse.getStatus() == 200) {
-                LogUtil.log("Auth was successful.", "Status:", authResponse.getStatus());
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Auth was successful.", "Status:", authResponse.getStatus());
             } else {
-                LogUtil.log("Response without 200 status.", "Response", authResponse);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Response without 200 status.", "Response", authResponse);
                 throw new Error("Authentication failed");
 
             }
@@ -32,17 +35,21 @@ public class Instance {
             /*
              * SET sample
              */
-            String value = "PONG";
-            ByteString payloadValue = ByteString.copyFromUtf8(value);
+            // String value = "PONG";
+            // ByteString payloadValue = ByteString.copyFromUtf8(value);
+
+            Path filePath = Path.of("/home/hassaan/Project/loadTestFiles/100_MB_FILE.bin");
+            byte[] fileBytes = Files.readAllBytes(filePath);
+            ByteString payloadValue = ByteString.copyFrom(fileBytes);
 
             Response setResponse = cacheClient.setKey("PING", payloadValue, false, false);
 
             // Validate response
             if (setResponse.getStatus() == 201) {
                 String message = setResponse.getMessage();
-                LogUtil.log(message, "Response status: ", setResponse.getStatus(), "Set message:", message);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log(message, "Response status: ", setResponse.getStatus(), "Set message:", message);
             } else {
-                LogUtil.log("Response without 201 status.", "Response", setResponse);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Response without 201 status.", "Response", setResponse);
                 throw new Exception("Set request failed.");
             }
 
@@ -51,21 +58,22 @@ public class Instance {
             /*
              * GET sample
              */
-            Response getResponse = cacheClient.getKey("PING");
+            Response getResponse = cacheClient.getKey("PING",false,true); // TODO: payload size should be ENUM.
 
             // Validate response
             if (getResponse.getStatus() == 200) {
-                ByteString returnedValue = getResponse.getValue();
-                LogUtil.log("Response received successfully", "Value", returnedValue);
+                String returnedMessage = getResponse.getMessage();
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Response received successfully", "Value", returnedMessage);
             } else {
-                LogUtil.log("Response without 200 status.", "Response", getResponse);
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Response without 200 status.", "Response", getResponse);
 
                 throw new Exception("Get request failed.");
             }
 
+            LogUtil.log("Completed successfully");
         } catch (Exception e) {
             cacheClient.shutdown();
-            LogUtil.log("Error in Instance main method.", "Error message", e.getMessage(), "Error", e);
+            if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error in Instance main method.", "Error message", e.getMessage(), "Error", e);
         }
 
     }

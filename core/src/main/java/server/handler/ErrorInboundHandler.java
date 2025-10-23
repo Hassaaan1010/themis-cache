@@ -1,5 +1,6 @@
 package server.handler;
 
+import server.EchoServer;
 import server.serverUtils.EchoException;
 
 import common.LogUtil;
@@ -16,7 +17,7 @@ public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws NullPointerException {
         
-        LogUtil.log("Error", cause.getMessage());
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("Error", cause.getMessage());
 
         cause.printStackTrace();
 
@@ -27,7 +28,7 @@ public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
             status = 500;
             message = "Internal server error";
             
-            LogUtil.log("Error was thrown without new EchoException(int status, String message).", "Error", cause.getMessage());
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Error was thrown without new EchoException(int status, String message).", "Error", cause.getMessage());
             cause.printStackTrace();
         }
      

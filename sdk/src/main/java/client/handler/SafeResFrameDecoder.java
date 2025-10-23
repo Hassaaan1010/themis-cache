@@ -2,6 +2,7 @@ package client.handler;
 
 import java.util.List;
 
+import client.EchoClient;
 import common.CommonConstants;
 import common.LogUtil;
 import io.netty.buffer.ByteBuf;
@@ -43,7 +44,7 @@ public class SafeResFrameDecoder extends ByteToMessageDecoder {
             shift += 7;
             if (shift > 35) {
                 in.clear();
-                LogUtil.log("Malformed varint32. Closing connection");
+                if (EchoClient.DEBUG_CLIENT) LogUtil.log("Malformed varint32. Closing connection");
                 ctx.close();
                 return;
             }
@@ -52,19 +53,19 @@ public class SafeResFrameDecoder extends ByteToMessageDecoder {
         // Validate frame length (optional)
         if (frameLength > maxFrameSize) {
             in.clear();
-            LogUtil.log("Response too large. Closing connection.");
+            if (EchoClient.DEBUG_CLIENT) LogUtil.log("Response too large. Closing connection.");
             ctx.close();
             return;
         }
 
-        System.out.println("Frame size of Res: " + frameLength);
-
+        
         // Check if we have enough bytes for the full frame
         if (in.readableBytes() < frameLength) {
             in.resetReaderIndex(); // Reset to BEFORE varint
             return;
         }
-
+        System.out.println("Frame size of Res: " + frameLength);
+        
         // Extract frame (WITHOUT length prefix)
         ByteBuf frame = in.readRetainedSlice(frameLength);
         out.add(frame);

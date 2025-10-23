@@ -27,6 +27,8 @@ import server.parsing.ProtobufServerCodec;
 
 public class EchoServer {
 
+    public static final boolean DEBUG_SERVER = false;
+
     private final int port;
     private ChannelFuture channelFuture;
     private NioEventLoopGroup bossGroup;
@@ -69,20 +71,20 @@ public class EchoServer {
                     });
 
             channelFuture = b.bind(port).sync();
-            LogUtil.log("Server started:", "Port", port);
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Server started:", "Port", port);
             channelFuture.channel().closeFuture().sync();
 
         } catch (Exception e) {
-            LogUtil.log("Error in Echo Server initialization : ", "Error", e);
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Echo Server initialization : ", "Error", e);
         } finally {
-            LogUtil.log("Shutting down server thread groups.");
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Shutting down server thread groups.");
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
     }
 
     public void shutdown() {
-        LogUtil.log("Shutting down server gracefully...");
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("Shutting down server gracefully...");
         if (channelFuture != null) {
             channelFuture.channel().close();
         }

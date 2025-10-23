@@ -4,6 +4,7 @@ import common.LogUtil;
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
 import io.netty.channel.ChannelHandlerContext;
+import server.EchoServer;
 import server.controllers.helpers.ResponseBuilders;
 
 public class SetController {
@@ -22,7 +23,7 @@ public class SetController {
 
         ctx.writeAndFlush(res);
 
-        LogUtil.log("SET response was logged and flushed", "Response", res, "RequestId", req.getRequestId(),
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("SET response was logged and flushed", "Response", res, "RequestId", req.getRequestId(),
                 "ResponseId", res.getResponseId());
         return;
     }
