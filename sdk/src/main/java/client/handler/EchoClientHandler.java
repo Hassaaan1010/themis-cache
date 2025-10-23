@@ -1,40 +1,37 @@
 package client.handler;
 
 import common.LogUtil;
-import common.parsing.protos.RequestProtos;
-import common.parsing.protos.ResponseProtos;
-import commonSDK.EnvConfig;
 // import common.parsing.protos.RequestProtos.Request;
+import common.parsing.protos.ResponseProtos.Response;
+
 import io.netty.channel.ChannelException;
-// import io.netty.channel.ChannelFuture;
-// import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import com.google.protobuf.ByteString;
+
+import client.EchoClient;
+// import client.clientUtils.RequestUtils;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-// import models.RequestData;
-// import models.ResponseData;
 
 public class EchoClientHandler extends ChannelInboundHandlerAdapter {
+
+    private final EchoClient client;
+
+    // Constructor ties itself to client instance.
+    public EchoClientHandler(EchoClient client) {
+        this.client = client;
+    }
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws ChannelException {
+        // Runs on channel initialization.
         try {
-            // Runs on channel initialization. 
-            
-            String tenantId = EnvConfig.TENANT_ID;
-            String password = EnvConfig.PASSWORD;
 
-            // final String key = "PING";
-            RequestProtos.Request req = RequestProtos.Request.newBuilder()
-                    .setAction(RequestProtos.Action.AUTH) // 1 + 1 feild prefix
-                    .setKey(tenantId) // 24 + 1 + 1 feild prefix
-                    .setKeyLength(tenantId.length()) // 1 + 1 feild prefix
-                    .setValue(ByteString.copyFromUtf8(password)) // 15 + 1 feild prefix
-                    .setValueLength(password.length()) // 1 + 1 feild prefix
-                    .build();
-            LogUtil.log("Attempting auth from channelActive.");
-            
-            ctx.writeAndFlush(req);
+            // Request req = RequestUtils.makeAuthRequest();
 
+            // LogUtil.log("Attempting auth from channelActive.");
+
+            // ctx.writeAndFlush(req);
+
+            // return;
         } catch (Exception e) {
             LogUtil.log("Error in EchoClientHandler ", "Error", e);
             // throw new ChannelException("Error occured in EchoClientHandler");
@@ -44,22 +41,24 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
-            ResponseProtos.Response res;
+            Response res;
 
-            if (msg instanceof ResponseProtos.Response) {
-                res = (ResponseProtos.Response) msg;
+            if (msg instanceof Response) {
+                res = (Response) msg;
+                // Error handling. Possibly decrypt and decompress here
+                LogUtil.log("ChannelRead received.", "Response Id", res.getResponseId());
+                LogUtil.log("Response received: ", "Res:",res,"ResponseId",res.getResponseId());
+                client.completeFuture(res);
 
-                LogUtil.log("Response received:", "Response:", msg, "Value: ", res.getValue());
 
             } else {
                 throw new Exception("Response object of wrong class" + msg.getClass());
             }
 
-            LogUtil.log(null, "ResponseData : ", res);
-            // ctx.close();
         } catch (Exception e) {
-            LogUtil.log("Error in Client channelRead:", "Response data", (ResponseProtos.Response) msg);
+            LogUtil.log("Error in Client channelRead:", "Response data", (Response) msg);
             ctx.close();
         }
     }
+
 }

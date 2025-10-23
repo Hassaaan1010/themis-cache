@@ -3,7 +3,7 @@ package client.handler;
 import java.util.List;
 
 import common.CommonConstants;
-import common.parsing.protos.ResponseProtos;
+import common.LogUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -19,57 +19,54 @@ public class SafeResFrameDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        // Mark reader index BEFORE reading varint
         in.markReaderIndex();
-        if (!in.isReadable())
-            return;
 
-        // Peek varint length safely
+        // Read the varint32 length prefix
         int frameLength = 0;
         int shift = 0;
-        boolean incomplete = false;
-        in.markReaderIndex();
+        byte tmp;
+
         while (true) {
             if (!in.isReadable()) {
-                incomplete = true;
-                break;
+                in.resetReaderIndex();
+                return; // Need more data
             }
-            byte b = in.readByte();
-            frameLength |= (b & 0x7F) << shift;
-            if ((b & 0x80) == 0)
-                break;
+
+            tmp = in.readByte();
+            frameLength |= (tmp & 0x7F) << shift;
+
+            if ((tmp & 0x80) == 0) {
+                break; // Last byte of varint
+            }
+
             shift += 7;
             if (shift > 35) {
                 in.clear();
-                ResponseProtos.Response res = makeUpErrorResponse("Malformed varint32 frame length");
-                out.add(res);
+                LogUtil.log("Malformed varint32. Closing connection");
+                ctx.close();
                 return;
             }
         }
-        if (incomplete) {
-            in.resetReaderIndex();
-            return;
-        }
 
+        // Validate frame length (optional)
         if (frameLength > maxFrameSize) {
-            in.skipBytes(frameLength);
-            ResponseProtos.Response res = makeUpErrorResponse(
-                    "Response frame exceeded max lenght. Length: " + frameLength);
-            out.add(res);
+            in.clear();
+            LogUtil.log("Response too large. Closing connection.");
+            ctx.close();
+            return;
         }
 
         System.out.println("Frame size of Res: " + frameLength);
 
-        // Now slice the frame and pass it downstream
+        // Check if we have enough bytes for the full frame
+        if (in.readableBytes() < frameLength) {
+            in.resetReaderIndex(); // Reset to BEFORE varint
+            return;
+        }
+
+        // Extract frame (WITHOUT length prefix)
         ByteBuf frame = in.readRetainedSlice(frameLength);
         out.add(frame);
-
-    }
-
-    private static ResponseProtos.Response makeUpErrorResponse(String cause) {
-        ResponseProtos.Response res = ResponseProtos.Response.newBuilder()
-                .setStatus(500)
-                .setMessage("Malformed server response. Cause: " + cause)
-                .build();
-        return res;
     }
 }

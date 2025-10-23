@@ -8,9 +8,11 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.client.model.Filters;
 
+import common.LogUtil;
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
 import db.MongoService;
+import server.controllers.helpers.ResponseBuilders;
 
 public class AuthController {
 
@@ -40,15 +42,20 @@ public class AuthController {
         } else { 
             message = UUID.randomUUID().toString();
             status = 200;
+            
+            validTokens.add(message);
+            
+            LogUtil.log("Authentication worked. Your token was added", "Token",message, "ValidTokens", validTokens );
         }
 
-        Response res = Response.newBuilder()
-                .setStatus(status)
-                .setMessage(message)
-                .setLength(message.length())
-                .build();
+        Response res = ResponseBuilders.makeAuthResponse(status, message, req.getRequestId());
 
         return res;
+    }
+
+    public static void removeToken(String token){ 
+        validTokens.remove(token);
+        return;
     }
 
     public static boolean authenticateToken(String token) {

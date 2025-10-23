@@ -1,10 +1,18 @@
 package client;
 
-import client.clientUtils.ErrorInboundHandler;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.protobuf.ByteString;
+
+import client.clientUtils.RequestUtils;
 
 // import com.google.protobuf.ByteString;
 
 import client.handler.EchoClientHandler;
+import client.handler.ErrorInboundHandler;
 import client.handler.SafeResFrameDecoder;
 // import client.parsing.ByteBufClientCodec;
 import client.parsing.ProtobufClientCodec;
@@ -13,92 +21,296 @@ import common.LogUtil;
 import common.interfaces.Codec;
 import common.parsing.protos.RequestProtos;
 import common.parsing.protos.ResponseProtos;
+import common.parsing.protos.RequestProtos.Request;
+import common.parsing.protos.ResponseProtos.Response;
+
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-// import models.RequestData;
-// import models.ResponseData;
+
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 
 public class EchoClient {
 
     private ChannelFuture channelFuture;
     private NioEventLoopGroup workerGroup;
+    private Bootstrap b;
 
-    public String token;
+    private Channel channel;
+
+    private String token;
 
     public EchoClient() {
-    }
-
-    public void start() throws Exception {
         try {
             workerGroup = new NioEventLoopGroup();
             // Codec<RequestData, ResponseData> codec = new ByteBufClientCodec();
             Codec<RequestProtos.Request, ResponseProtos.Response> codec = new ProtobufClientCodec();
 
-            Bootstrap b = new Bootstrap();
+            EchoClient clientInstance = this;
+            b = new Bootstrap();
             b.group(workerGroup)
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline()
-                            // .
-                            // .addLast(new )
-                            .addLast(new SafeResFrameDecoder())
-                            .addLast(codec.newDecoder())
-                            .addLast(new ProtobufVarint32LengthFieldPrepender())
-                            .addLast(codec.newEncoder())
-                            .addLast(new EchoClientHandler())
-                            .addLast(new ErrorInboundHandler());
-                    }
-                });
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline()
+                                    // .
+                                    // .addLast(new )
+                                    .addLast(new SafeResFrameDecoder())
+                                    .addLast(codec.newDecoder())
+
+                                    .addLast(new ProtobufVarint32LengthFieldPrepender())
+                                    .addLast(codec.newEncoder())
+
+                                    .addLast(new EchoClientHandler(clientInstance))
+                                    .addLast(new ErrorInboundHandler());
+                        }
+                    });
+            LogUtil.log("Client instantiated.");
+
+        } catch (Exception e) {
+            LogUtil.log("Error initializing EchoClient.", "Error", e);
+            System.exit(1);
+        }
+    }
+
+    public void start() throws Exception {
+        try {
 
             channelFuture = b.connect(CommonConstants.SERVER_HOST, CommonConstants.SERVER_PORT).sync();
-            System.out.println("Client connected to " + CommonConstants.SERVER_HOST + ":" + CommonConstants.SERVER_PORT);
+            System.out
+                    .println("Client connected to " + CommonConstants.SERVER_HOST + ":" + CommonConstants.SERVER_PORT);
 
-            channelFuture.channel().closeFuture().sync();
+            this.channel = channelFuture.channel();
+
+            // Non-blocking: get notified when channel closes
+            this.channel.closeFuture().addListener((_ -> {
+                LogUtil.log("Channel closed, cleaning up...");
+                workerGroup.shutdownGracefully();
+            }));
 
         } catch (Exception e) {
             LogUtil.log("Error in Echo Client : ", "Error", e);
-        } finally {
             workerGroup.shutdownGracefully();
         }
     }
 
     public void shutdown() {
-        System.out.println("Shutting down client gracefully...");
-        if (channelFuture != null) {
-            channelFuture.channel().close();
+        try {
+            if (this.channel != null) {
+                this.channel.close().sync();
+            }
+            System.out.println("Shutting down client gracefully...");
+            if (channelFuture != null) {
+                channelFuture.channel().close();
+            }
+            if (workerGroup != null) {
+                workerGroup.shutdownGracefully();
+            }
+
+        } catch (Exception e) {
+            LogUtil.log("Error while shutting down.", "Error", e);
+            System.exit(1);
         }
-        if (workerGroup != null) {
-            workerGroup.shutdownGracefully();
+
+    }
+
+    /*
+     * User runs program with one thread that reaches line to call .GET() the
+     * function is added to stack. Then an integer id is created atomically, then we
+     * create a CompletableFuture object with Response for <T> meaning that on
+     * completion of the promise a Response type will take the place of the
+     * placeholder return value. then this future is mapped into a concurrent
+     * Hashmap with id. then Request is created and sent off to server. and the
+     * reference to the future is returned. if i get this correctly, this returned
+     * reference and the map pointer for the id - both point to the same address.
+     * when the placeholder future is returned, the thread that had called the
+     * .GET() just waits there until the placeholder is changed to the type of value
+     * that is actually expected (Response) meanwhile the channel handler is
+     * processing incoming data in the channelRead. when the object is received. it
+     * calls the completeFuture method to pop that request from that hashmap, this
+     * popped object is ofcourse the address to the placeholder where a response is
+     * being awaited, so then we can call .complete which writes the Response res to
+     * the placeholders address. and then the thread can continue on its path...
+     */
+
+    private final ConcurrentHashMap<Integer, CompletableFuture<Response>> pendingRequests = new ConcurrentHashMap<>();
+    private final AtomicInteger atomicIdGenerator = new AtomicInteger();
+
+    public void completeFuture(Response res) {
+        LogUtil.log("Completing future.", "Response", res, "ResponseId",res.getResponseId());
+        CompletableFuture<Response> future = pendingRequests.remove(res.getResponseId());
+        if (future != null) {
+            future.complete(res);
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        EchoClient client = new EchoClient();
+    /*
+     * Successful get returns 200
+     */
+    public Response getKey(String key) throws Exception {
+        Integer requestId = atomicIdGenerator.getAndIncrement();
+        LogUtil.log("Request GET generated.", "Id", requestId);
 
-        // Hook for Ctrl+C or SIGTERM
-        Runtime.getRuntime().addShutdownHook(new Thread(client::shutdown));
-        
-        client.start();
+        CompletableFuture<Response> future = new CompletableFuture<>();
+
+        Request req = RequestUtils.makeGetRequest(this.token, key, 0, requestId);
+        Response getResponse;
+        pendingRequests.put(requestId, future);
+
+        try {
+
+            CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
+                    RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
+                    CommonConstants.REQUEST_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+
+            channel.writeAndFlush(req);
+
+            getResponse = futureWithTimeout.get();
+        } catch (Exception e) {
+            LogUtil.log("Error occured while trying to get key from cache server.\n", "Error", e);
+            getResponse = RequestUtils.makeUpErrorResponse(500, "Failed to get key.", requestId);
+
+        } finally {
+            pendingRequests.remove(requestId);
+        }
+
+        return getResponse;
     }
 
-    // public static void getKey(String key) {
-        
-    // }
+    /*
+     * Successful set returns 201
+     */
+    public Response setKey(String key, ByteString value, boolean encrypt, boolean compress) {
 
-    // public static boolean setKey(String key, Byte[] Value) {
-        
-    // }
+        // Otions handle
+        int options = 0;
+        if (encrypt) {
+            options |= CommonConstants.encryptOption;
+        }
+        if (compress) {
+            options |= CommonConstants.compressOption;
+        }
 
-    // public static deleteKey(String key) {
+        // Request handle
+        Integer requestId = atomicIdGenerator.getAndIncrement();
+        LogUtil.log("Request SET generated.", "Id", requestId);
 
-    // }
+        CompletableFuture<Response> future = new CompletableFuture<>();
+
+        pendingRequests.put(requestId, future);
+
+        int tempReqId = (int) requestId;
+        LogUtil.log("SET method creating request.","Request id used:", requestId, "Request id had it been int:", tempReqId );
+        Request req = RequestUtils.makeSetRequest(token, key, value, options, requestId);
+        Response setResponse;
+
+        try {
+
+            CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
+                    RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
+                    CommonConstants.REQUEST_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+
+            LogUtil.log("SET Request was flushed. ", "Request id", req.getRequestId());
+            channel.writeAndFlush(req);
+
+            setResponse = futureWithTimeout.get();
+
+        } catch (Exception e) {
+            LogUtil.log("Error occured while trying to set key to cache server.\n", "Error", e);
+            setResponse = RequestUtils.makeUpErrorResponse(500, "Failed to set key.", requestId);
+        } finally {
+            pendingRequests.remove(requestId);
+        }
+
+        return setResponse;
+
+    }
+
+    /*
+     * Successful delete returns 204
+     */
+    public Response deleteKey(String key) {
+        Integer requestId = atomicIdGenerator.getAndIncrement();
+        LogUtil.log("Request DEL generated.", "Id", requestId);
+
+        CompletableFuture<Response> future = new CompletableFuture<>();
+        pendingRequests.put(requestId, future);
+
+        Request req = RequestUtils.makeDelRequest(token, key, 0, requestId);
+        Response deleteResponse;
+
+        try {
+            CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
+                    RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
+                    CommonConstants.REQUEST_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+
+            channel.writeAndFlush(req);
+
+            deleteResponse = futureWithTimeout.get();
+
+        } catch (Exception e) {
+            LogUtil.log("Error occured while trying to set key to cache server.\n", "Error", e);
+            deleteResponse = RequestUtils.makeUpErrorResponse(500, "Failed to delete key.", requestId);
+        } finally {
+            pendingRequests.remove(requestId);
+        }
+
+        return deleteResponse;
+    }
+
+    /*
+     * Successful authentication returns 200
+     */
+    public Response authenticate() {
+        Integer requestId = atomicIdGenerator.getAndIncrement();
+        LogUtil.log("Request AUTH generated.", "Id", requestId);
+        // Add listner to awaited address
+        CompletableFuture<Response> future = new CompletableFuture<>();
+
+        // Put req Id mapping to the address.
+        pendingRequests.put(requestId, future);
+        Request req = RequestUtils.makeAuthRequest(requestId);
+        Response authResponse;
+
+        try {
+
+            // Link additional listner to address with a default response if address doesn't
+            // receive valid response until timeout.
+            CompletableFuture<Response> futureWithTimeout = future.completeOnTimeout(
+                    RequestUtils.makeUpErrorResponse(504, "Request:" + requestId + "timed out.", requestId),
+                    CommonConstants.REQUEST_TIMEOUT,
+                    TimeUnit.MILLISECONDS);
+
+            LogUtil.log("log timeout","Timeout duration: ",CommonConstants.REQUEST_TIMEOUT);
+
+            channel.writeAndFlush(req);
+
+            // Get which ever resolved first to the address
+            authResponse = futureWithTimeout.get();
+
+            if (authResponse.getStatus() == 200) {
+                this.token = authResponse.getMessage();
+            }
+
+        } catch (Exception e) {
+            // TODO: handle exception
+            LogUtil.log("Error occured while trying to authenticate.\n", "Error", e);
+            authResponse = RequestUtils.makeUpErrorResponse(500, "Failed to authenticate.", requestId);
+        } finally {
+            pendingRequests.remove(requestId);
+        }
+
+        return authResponse;
+    }
+
 }

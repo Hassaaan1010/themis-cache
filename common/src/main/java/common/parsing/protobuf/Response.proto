@@ -7,8 +7,8 @@ option java_outer_classname = "ResponseProtos";
 message Response {
     int32 status = 1;
     string message = 2;
-    int32 length = 3;
-    bytes value = 4;
+    bytes value = 3;
+    int32 responseId = 4;
 }
 
 // Every change in this file must revise ../../CommonConstants.java 

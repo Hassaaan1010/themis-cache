@@ -37,16 +37,16 @@ public final class ResponseProtos {
         getMessageBytes();
 
     /**
-     * <code>int32 length = 3;</code>
-     * @return The length.
-     */
-    int getLength();
-
-    /**
-     * <code>bytes value = 4;</code>
+     * <code>bytes value = 3;</code>
      * @return The value.
      */
     com.google.protobuf.ByteString getValue();
+
+    /**
+     * <code>int32 responseId = 4;</code>
+     * @return The responseId.
+     */
+    int getResponseId();
   }
   /**
    * Protobuf type {@code Response}
@@ -140,26 +140,26 @@ public final class ResponseProtos {
       }
     }
 
-    public static final int LENGTH_FIELD_NUMBER = 3;
-    private int length_ = 0;
-    /**
-     * <code>int32 length = 3;</code>
-     * @return The length.
-     */
-    @java.lang.Override
-    public int getLength() {
-      return length_;
-    }
-
-    public static final int VALUE_FIELD_NUMBER = 4;
+    public static final int VALUE_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
     /**
-     * <code>bytes value = 4;</code>
+     * <code>bytes value = 3;</code>
      * @return The value.
      */
     @java.lang.Override
     public com.google.protobuf.ByteString getValue() {
       return value_;
+    }
+
+    public static final int RESPONSEID_FIELD_NUMBER = 4;
+    private int responseId_ = 0;
+    /**
+     * <code>int32 responseId = 4;</code>
+     * @return The responseId.
+     */
+    @java.lang.Override
+    public int getResponseId() {
+      return responseId_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -182,11 +182,11 @@ public final class ResponseProtos {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(message_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, message_);
       }
-      if (length_ != 0) {
-        output.writeInt32(3, length_);
-      }
       if (!value_.isEmpty()) {
-        output.writeBytes(4, value_);
+        output.writeBytes(3, value_);
+      }
+      if (responseId_ != 0) {
+        output.writeInt32(4, responseId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -204,13 +204,13 @@ public final class ResponseProtos {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(message_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, message_);
       }
-      if (length_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, length_);
-      }
       if (!value_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(4, value_);
+          .computeBytesSize(3, value_);
+      }
+      if (responseId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, responseId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -231,10 +231,10 @@ public final class ResponseProtos {
           != other.getStatus()) return false;
       if (!getMessage()
           .equals(other.getMessage())) return false;
-      if (getLength()
-          != other.getLength()) return false;
       if (!getValue()
           .equals(other.getValue())) return false;
+      if (getResponseId()
+          != other.getResponseId()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -250,10 +250,10 @@ public final class ResponseProtos {
       hash = (53 * hash) + getStatus();
       hash = (37 * hash) + MESSAGE_FIELD_NUMBER;
       hash = (53 * hash) + getMessage().hashCode();
-      hash = (37 * hash) + LENGTH_FIELD_NUMBER;
-      hash = (53 * hash) + getLength();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue().hashCode();
+      hash = (37 * hash) + RESPONSEID_FIELD_NUMBER;
+      hash = (53 * hash) + getResponseId();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -385,8 +385,8 @@ public final class ResponseProtos {
         bitField0_ = 0;
         status_ = 0;
         message_ = "";
-        length_ = 0;
         value_ = com.google.protobuf.ByteString.EMPTY;
+        responseId_ = 0;
         return this;
       }
 
@@ -427,10 +427,10 @@ public final class ResponseProtos {
           result.message_ = message_;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
-          result.length_ = length_;
+          result.value_ = value_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          result.value_ = value_;
+          result.responseId_ = responseId_;
         }
       }
 
@@ -486,11 +486,11 @@ public final class ResponseProtos {
           bitField0_ |= 0x00000002;
           onChanged();
         }
-        if (other.getLength() != 0) {
-          setLength(other.getLength());
-        }
         if (other.getValue() != com.google.protobuf.ByteString.EMPTY) {
           setValue(other.getValue());
+        }
+        if (other.getResponseId() != 0) {
+          setResponseId(other.getResponseId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -528,16 +528,16 @@ public final class ResponseProtos {
                 bitField0_ |= 0x00000002;
                 break;
               } // case 18
-              case 24: {
-                length_ = input.readInt32();
+              case 26: {
+                value_ = input.readBytes();
                 bitField0_ |= 0x00000004;
                 break;
-              } // case 24
-              case 34: {
-                value_ = input.readBytes();
+              } // case 26
+              case 32: {
+                responseId_ = input.readInt32();
                 bitField0_ |= 0x00000008;
                 break;
-              } // case 34
+              } // case 32
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -659,41 +659,9 @@ public final class ResponseProtos {
         return this;
       }
 
-      private int length_ ;
-      /**
-       * <code>int32 length = 3;</code>
-       * @return The length.
-       */
-      @java.lang.Override
-      public int getLength() {
-        return length_;
-      }
-      /**
-       * <code>int32 length = 3;</code>
-       * @param value The length to set.
-       * @return This builder for chaining.
-       */
-      public Builder setLength(int value) {
-        
-        length_ = value;
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 length = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearLength() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        length_ = 0;
-        onChanged();
-        return this;
-      }
-
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>bytes value = 4;</code>
+       * <code>bytes value = 3;</code>
        * @return The value.
        */
       @java.lang.Override
@@ -701,24 +669,56 @@ public final class ResponseProtos {
         return value_;
       }
       /**
-       * <code>bytes value = 4;</code>
+       * <code>bytes value = 3;</code>
        * @param value The value to set.
        * @return This builder for chaining.
        */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) { throw new NullPointerException(); }
         value_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bytes value = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValue() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+
+      private int responseId_ ;
+      /**
+       * <code>int32 responseId = 4;</code>
+       * @return The responseId.
+       */
+      @java.lang.Override
+      public int getResponseId() {
+        return responseId_;
+      }
+      /**
+       * <code>int32 responseId = 4;</code>
+       * @param value The responseId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResponseId(int value) {
+        
+        responseId_ = value;
         bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
       /**
-       * <code>bytes value = 4;</code>
+       * <code>int32 responseId = 4;</code>
        * @return This builder for chaining.
        */
-      public Builder clearValue() {
+      public Builder clearResponseId() {
         bitField0_ = (bitField0_ & ~0x00000008);
-        value_ = getDefaultInstance().getValue();
+        responseId_ = 0;
         onChanged();
         return this;
       }
@@ -800,10 +800,10 @@ public final class ResponseProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\016Response.proto\"J\n\010Response\022\016\n\006status\030\001" +
-      " \001(\005\022\017\n\007message\030\002 \001(\t\022\016\n\006length\030\003 \001(\005\022\r\n" +
-      "\005value\030\004 \001(\014B\'\n\025common.parsing.protosB\016R" +
-      "esponseProtosb\006proto3"
+      "\n\016Response.proto\"N\n\010Response\022\016\n\006status\030\001" +
+      " \001(\005\022\017\n\007message\030\002 \001(\t\022\r\n\005value\030\003 \001(\014\022\022\n\n" +
+      "responseId\030\004 \001(\005B\'\n\025common.parsing.proto" +
+      "sB\016ResponseProtosb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -814,7 +814,7 @@ public final class ResponseProtos {
     internal_static_Response_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Response_descriptor,
-        new java.lang.String[] { "Status", "Message", "Length", "Value", });
+        new java.lang.String[] { "Status", "Message", "Value", "ResponseId", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -17,9 +17,8 @@ message Request {
     string token = 2;
     string key = 3;
     bytes value = 4; 
-    int32 value_length = 5;
-    int32 key_length = 6;
     int32 options = 5;
+    int32 requestId = 6;
 }
 
 // Every change in this file must revise ../../CommonConstants.java 

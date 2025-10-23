@@ -3,17 +3,16 @@ package server.handler;
 import server.serverUtils.EchoException;
 
 import common.LogUtil;
-import common.parsing.protos.ResponseProtos;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import server.serverUtils.ResUtils;
 
+@Deprecated
 public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
 
     int status = 0;
     String message;
 
-    
+    @Deprecated
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws NullPointerException {
         
@@ -33,8 +32,8 @@ public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
         }
      
 
-        ResponseProtos.Response res = ResUtils.makeErrorResponse(this.status, this.message);
+        // ResponseProtos.Response res = ResponseBuilders.makeErrorResponse(this.status, this.message);
 
-        ctx.writeAndFlush(res);
+        // ctx.writeAndFlush(res);
     }
 }

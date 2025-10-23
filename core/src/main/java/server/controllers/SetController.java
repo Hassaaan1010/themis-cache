@@ -1,5 +1,6 @@
 package server.controllers;
 
+import common.LogUtil;
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,12 +13,17 @@ public class SetController {
         Response res;
 
         if (!AuthController.authenticateToken(req.getToken())) {
-            res = ResponseBuilders.InvalidTokenResponse;
+            res = ResponseBuilders.makeInvalidTokenResponse(req.getToken(), req.getRequestId());
         } else {
-            res = Response.newBuilder().build();
+            GetController.Cache.put(req.getKey(), req.getValue());
+
+            res = ResponseBuilders.makeSetResponse(201, "Key was set successfully.", req.getRequestId());
         }
 
         ctx.writeAndFlush(res);
+
+        LogUtil.log("SET response was logged and flushed", "Response", res, "RequestId", req.getRequestId(),
+                "ResponseId", res.getResponseId());
         return;
     }
 

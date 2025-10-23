@@ -12,12 +12,9 @@ public class DelController {
         Response res;
 
         if (!AuthController.authenticateToken(req.getToken())) {
-            res = ResponseBuilders.InvalidTokenResponse;
+            res = ResponseBuilders.makeInvalidTokenResponse(req.getToken(), req.getRequestId());
         } else {
-            res = Response.newBuilder()
-                    .setStatus(200)
-                    .setMessage("Deleted" + req.getKey() + "Successfully.")
-                    .build();
+            res = ResponseBuilders.makeDelResponse(204,"Key value pair deleted.",req.getRequestId() );
         }
 
         ctx.writeAndFlush(res);

@@ -21,7 +21,6 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 // import models.ResponseData;
 
 import server.handler.EchoServerHandler;
-import server.handler.ErrorInboundHandler;
 import server.handler.SafeReqFrameDecoder;
 // import server.parsing.ByteBufServerCodec;
 import server.parsing.ProtobufServerCodec;
@@ -58,13 +57,14 @@ public class EchoServer {
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             ch.pipeline()
-                                    // .addLast(new ReadTimeoutHandler(3)) // close inactive connections
-                                    .addLast(new SafeReqFrameDecoder()) // inbound frame decoder
-                                    .addLast(codec.newDecoder()) // inbound protobuf decoder
-                                    .addLast(new ProtobufVarint32LengthFieldPrepender()) // outbound length prepend
-                                    .addLast(codec.newEncoder()) // outbound protobuf encoder
-                                    .addLast(new EchoServerHandler()) // business logic
-                                    .addLast(new ErrorInboundHandler()); // exception handling
+                                    // .addLast(new ReadTimeoutHandler(3))                  // close inactive connections
+                                    .addLast(new SafeReqFrameDecoder())                     // inbound frame decoder
+                                    .addLast(codec.newDecoder())                            // inbound protobuf decoder
+                                    
+                                    .addLast(new ProtobufVarint32LengthFieldPrepender())    // outbound length prepend
+                                    .addLast(codec.newEncoder())                            // outbound protobuf encoder
+                                    .addLast(new EchoServerHandler());                      // inbound business logic
+                                    // .addLast(new ErrorInboundHandler());                    // inboundexception handling
                         }
                     });
 
@@ -75,6 +75,7 @@ public class EchoServer {
         } catch (Exception e) {
             LogUtil.log("Error in Echo Server initialization : ", "Error", e);
         } finally {
+            LogUtil.log("Shutting down server thread groups.");
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

@@ -195,22 +195,16 @@ public final class RequestProtos {
     com.google.protobuf.ByteString getValue();
 
     /**
-     * <code>int32 value_length = 5;</code>
-     * @return The valueLength.
-     */
-    int getValueLength();
-
-    /**
-     * <code>int32 key_length = 6;</code>
-     * @return The keyLength.
-     */
-    int getKeyLength();
-
-    /**
-     * <code>int32 options = 7;</code>
+     * <code>int32 options = 5;</code>
      * @return The options.
      */
     int getOptions();
+
+    /**
+     * <code>int32 requestId = 6;</code>
+     * @return The requestId.
+     */
+    int getRequestId();
   }
   /**
    * Protobuf type {@code Request}
@@ -363,37 +357,26 @@ public final class RequestProtos {
       return value_;
     }
 
-    public static final int VALUE_LENGTH_FIELD_NUMBER = 5;
-    private int valueLength_ = 0;
-    /**
-     * <code>int32 value_length = 5;</code>
-     * @return The valueLength.
-     */
-    @java.lang.Override
-    public int getValueLength() {
-      return valueLength_;
-    }
-
-    public static final int KEY_LENGTH_FIELD_NUMBER = 6;
-    private int keyLength_ = 0;
-    /**
-     * <code>int32 key_length = 6;</code>
-     * @return The keyLength.
-     */
-    @java.lang.Override
-    public int getKeyLength() {
-      return keyLength_;
-    }
-
-    public static final int OPTIONS_FIELD_NUMBER = 7;
+    public static final int OPTIONS_FIELD_NUMBER = 5;
     private int options_ = 0;
     /**
-     * <code>int32 options = 7;</code>
+     * <code>int32 options = 5;</code>
      * @return The options.
      */
     @java.lang.Override
     public int getOptions() {
       return options_;
+    }
+
+    public static final int REQUESTID_FIELD_NUMBER = 6;
+    private int requestId_ = 0;
+    /**
+     * <code>int32 requestId = 6;</code>
+     * @return The requestId.
+     */
+    @java.lang.Override
+    public int getRequestId() {
+      return requestId_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -422,14 +405,11 @@ public final class RequestProtos {
       if (!value_.isEmpty()) {
         output.writeBytes(4, value_);
       }
-      if (valueLength_ != 0) {
-        output.writeInt32(5, valueLength_);
-      }
-      if (keyLength_ != 0) {
-        output.writeInt32(6, keyLength_);
-      }
       if (options_ != 0) {
-        output.writeInt32(7, options_);
+        output.writeInt32(5, options_);
+      }
+      if (requestId_ != 0) {
+        output.writeInt32(6, requestId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -454,17 +434,13 @@ public final class RequestProtos {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, value_);
       }
-      if (valueLength_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, valueLength_);
-      }
-      if (keyLength_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(6, keyLength_);
-      }
       if (options_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(7, options_);
+          .computeInt32Size(5, options_);
+      }
+      if (requestId_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, requestId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -488,12 +464,10 @@ public final class RequestProtos {
           .equals(other.getKey())) return false;
       if (!getValue()
           .equals(other.getValue())) return false;
-      if (getValueLength()
-          != other.getValueLength()) return false;
-      if (getKeyLength()
-          != other.getKeyLength()) return false;
       if (getOptions()
           != other.getOptions()) return false;
+      if (getRequestId()
+          != other.getRequestId()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -513,12 +487,10 @@ public final class RequestProtos {
       hash = (53 * hash) + getKey().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue().hashCode();
-      hash = (37 * hash) + VALUE_LENGTH_FIELD_NUMBER;
-      hash = (53 * hash) + getValueLength();
-      hash = (37 * hash) + KEY_LENGTH_FIELD_NUMBER;
-      hash = (53 * hash) + getKeyLength();
       hash = (37 * hash) + OPTIONS_FIELD_NUMBER;
       hash = (53 * hash) + getOptions();
+      hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
+      hash = (53 * hash) + getRequestId();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -652,9 +624,8 @@ public final class RequestProtos {
         token_ = "";
         key_ = "";
         value_ = com.google.protobuf.ByteString.EMPTY;
-        valueLength_ = 0;
-        keyLength_ = 0;
         options_ = 0;
+        requestId_ = 0;
         return this;
       }
 
@@ -701,13 +672,10 @@ public final class RequestProtos {
           result.value_ = value_;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
-          result.valueLength_ = valueLength_;
+          result.options_ = options_;
         }
         if (((from_bitField0_ & 0x00000020) != 0)) {
-          result.keyLength_ = keyLength_;
-        }
-        if (((from_bitField0_ & 0x00000040) != 0)) {
-          result.options_ = options_;
+          result.requestId_ = requestId_;
         }
       }
 
@@ -771,14 +739,11 @@ public final class RequestProtos {
         if (other.getValue() != com.google.protobuf.ByteString.EMPTY) {
           setValue(other.getValue());
         }
-        if (other.getValueLength() != 0) {
-          setValueLength(other.getValueLength());
-        }
-        if (other.getKeyLength() != 0) {
-          setKeyLength(other.getKeyLength());
-        }
         if (other.getOptions() != 0) {
           setOptions(other.getOptions());
+        }
+        if (other.getRequestId() != 0) {
+          setRequestId(other.getRequestId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -827,20 +792,15 @@ public final class RequestProtos {
                 break;
               } // case 34
               case 40: {
-                valueLength_ = input.readInt32();
+                options_ = input.readInt32();
                 bitField0_ |= 0x00000010;
                 break;
               } // case 40
               case 48: {
-                keyLength_ = input.readInt32();
+                requestId_ = input.readInt32();
                 bitField0_ |= 0x00000020;
                 break;
               } // case 48
-              case 56: {
-                options_ = input.readInt32();
-                bitField0_ |= 0x00000040;
-                break;
-              } // case 56
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1087,73 +1047,9 @@ public final class RequestProtos {
         return this;
       }
 
-      private int valueLength_ ;
-      /**
-       * <code>int32 value_length = 5;</code>
-       * @return The valueLength.
-       */
-      @java.lang.Override
-      public int getValueLength() {
-        return valueLength_;
-      }
-      /**
-       * <code>int32 value_length = 5;</code>
-       * @param value The valueLength to set.
-       * @return This builder for chaining.
-       */
-      public Builder setValueLength(int value) {
-        
-        valueLength_ = value;
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 value_length = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearValueLength() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        valueLength_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int keyLength_ ;
-      /**
-       * <code>int32 key_length = 6;</code>
-       * @return The keyLength.
-       */
-      @java.lang.Override
-      public int getKeyLength() {
-        return keyLength_;
-      }
-      /**
-       * <code>int32 key_length = 6;</code>
-       * @param value The keyLength to set.
-       * @return This builder for chaining.
-       */
-      public Builder setKeyLength(int value) {
-        
-        keyLength_ = value;
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 key_length = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearKeyLength() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        keyLength_ = 0;
-        onChanged();
-        return this;
-      }
-
       private int options_ ;
       /**
-       * <code>int32 options = 7;</code>
+       * <code>int32 options = 5;</code>
        * @return The options.
        */
       @java.lang.Override
@@ -1161,24 +1057,56 @@ public final class RequestProtos {
         return options_;
       }
       /**
-       * <code>int32 options = 7;</code>
+       * <code>int32 options = 5;</code>
        * @param value The options to set.
        * @return This builder for chaining.
        */
       public Builder setOptions(int value) {
         
         options_ = value;
-        bitField0_ |= 0x00000040;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 options = 7;</code>
+       * <code>int32 options = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearOptions() {
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000010);
         options_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int requestId_ ;
+      /**
+       * <code>int32 requestId = 6;</code>
+       * @return The requestId.
+       */
+      @java.lang.Override
+      public int getRequestId() {
+        return requestId_;
+      }
+      /**
+       * <code>int32 requestId = 6;</code>
+       * @param value The requestId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRequestId(int value) {
+        
+        requestId_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 requestId = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRequestId() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        requestId_ = 0;
         onChanged();
         return this;
       }
@@ -1260,13 +1188,12 @@ public final class RequestProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rRequest.proto\"\210\001\n\007Request\022\027\n\006action\030\001 " +
-      "\001(\0162\007.Action\022\r\n\005token\030\002 \001(\t\022\013\n\003key\030\003 \001(\t" +
-      "\022\r\n\005value\030\004 \001(\014\022\024\n\014value_length\030\005 \001(\005\022\022\n" +
-      "\nkey_length\030\006 \001(\005\022\017\n\007options\030\007 \001(\005*8\n\006Ac" +
-      "tion\022\007\n\003GET\020\000\022\007\n\003SET\020\001\022\007\n\003DEL\020\002\022\010\n\004AUTH\020" +
-      "\003\022\t\n\005CLOSE\020\004B&\n\025common.parsing.protosB\rR" +
-      "equestProtosb\006proto3"
+      "\n\rRequest.proto\"q\n\007Request\022\027\n\006action\030\001 \001" +
+      "(\0162\007.Action\022\r\n\005token\030\002 \001(\t\022\013\n\003key\030\003 \001(\t\022" +
+      "\r\n\005value\030\004 \001(\014\022\017\n\007options\030\005 \001(\005\022\021\n\treque" +
+      "stId\030\006 \001(\005*8\n\006Action\022\007\n\003GET\020\000\022\007\n\003SET\020\001\022\007" +
+      "\n\003DEL\020\002\022\010\n\004AUTH\020\003\022\t\n\005CLOSE\020\004B&\n\025common.p" +
+      "arsing.protosB\rRequestProtosb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1277,7 +1204,7 @@ public final class RequestProtos {
     internal_static_Request_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Request_descriptor,
-        new java.lang.String[] { "Action", "Token", "Key", "Value", "ValueLength", "KeyLength", "Options", });
+        new java.lang.String[] { "Action", "Token", "Key", "Value", "Options", "RequestId", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

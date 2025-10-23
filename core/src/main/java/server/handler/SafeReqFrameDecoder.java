@@ -2,74 +2,86 @@ package server.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
+import io.netty.handler.codec.ByteToMessageDecoder;
+// import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import server.serverUtils.EchoException;
 
 import java.util.List;
 
 import common.CommonConstants;
+import common.LogUtil;
 
-public class SafeReqFrameDecoder extends ProtobufVarint32FrameDecoder {
+public class SafeReqFrameDecoder extends ByteToMessageDecoder {
     private final int maxFrameSize;
     private final int minFrameSize;
 
     public SafeReqFrameDecoder() {
-        super();
         this.maxFrameSize = CommonConstants.MAX_REQ_SIZE;
         this.minFrameSize = CommonConstants.MIN_REQ_SIZE;
     }
 
+    @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-
+        LogUtil.log("Did we reach the frame length prepend safe decoder?");
+        
+        // Mark reader index so we can reset if needed
         in.markReaderIndex();
-        if (!in.isReadable())
-            return;
-
-        // Defensive check: if client lied about length (partial or incomplete frame)
-        if (in.readableBytes() < minFrameSize) {
-            in.resetReaderIndex();
-            return; // wait for more bytes
-        }
-
-        // Peek varint32 length safely without advancing readerIndex until we know we
-        // can handle it
-        // we read 1 MSB and if it is 1, there are more bytes to come, else that was
-        // last byte of varInt32
-        int frameLength = 0;
+        
+        // Read the varint32 length prefix
+        // int preIndex = in.readerIndex();
+        int length = 0;
         int shift = 0;
+        byte tmp;
+        
         while (true) {
             if (!in.isReadable()) {
                 in.resetReaderIndex();
+                return; // Need more data
+            }
+            
+            tmp = in.readByte();
+            length |= (tmp & 0x7F) << shift;
+            
+            if ((tmp & 0x80) == 0) {
+                break; // Last byte of varint marked by 0
+            }
+            
+            shift += 7;
+            if (shift > 35) {
+                // Malformed varint - too many bytes
+                in.clear();
+                // Likely tampering with SDK internals. Close connection. 
+                LogUtil.log("Malformed varint32 frame length. Closing connection");
+                ctx.close();
                 return;
             }
-            byte b = in.readByte();
-            frameLength |= (b & 0x7F) << shift;
-            if ((b & 0x80) == 0)
-                break;
-            shift += 7;
-            // varInt is 1-5 bytes. if > 5*7 : invalid.
-            // if (shift > 35) {
-            // in.clear();
-            // throw new EchoException(400, "Malformed varint32 frame length. Length read: "
-            // + frameLength);
-            // }
-            if (shift > 35) {
-                in.skipBytes(in.readableBytes());
-                throw new EchoException(400, "Malformed varint32 frame length");
-            }
-
         }
-
-        System.out.println("Frame size of Req: " + frameLength);
-
-        // Defensive check: if declared size > max
-        if (in.readableBytes() > maxFrameSize) {
+        
+        // Validate length      
+        if (length < minFrameSize) {
             in.clear();
-            throw new EchoException(400, "The payload send was too large and could not be processed.");
+            throw new EchoException(400, "Request object too small. Possibly malformed. Length :" + length);
         }
-
-        // Now slice the frame and pass it downstream
-        ByteBuf frame = in.readRetainedSlice(frameLength);
+        
+        if (length > maxFrameSize) {
+            in.clear();
+            // Likely tampering with SDK internals. Close connection. 
+                LogUtil.log("Request object was too large. Length: " + length + " Closing connection.");
+                ctx.close();
+                return;
+        }
+        
+        System.out.println("Frame size of Req: " + length);
+        
+        // Check if we have enough bytes for the full frame
+        if (in.readableBytes() < length) {
+            // Not enough data yet, reset and wait
+            in.resetReaderIndex();
+            return;
+        }
+        
+        // Success - extract the frame (WITHOUT the length prefix)
+        ByteBuf frame = in.readRetainedSlice(length);
         out.add(frame);
     }
 }

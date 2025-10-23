@@ -3,10 +3,17 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Debug EchoServer (Maven)",
+      "name": "EchoServer Debug(Maven)",
       "request": "launch",
       "mainClass": "server.EchoServer",
       "projectName": "core"
+    },
+    {
+      "type": "java",
+      "name": "EchoClient Debug(Maven)",
+      "request": "launch",
+      "mainClass": "instance.Instance",
+      "projectName": "sdk"
     }
   ]
 }

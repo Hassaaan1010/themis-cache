@@ -1,8 +1,7 @@
-package client.clientUtils;
+package client.handler;
 
 
 import common.LogUtil;
-import common.parsing.protos.ResponseProtos;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -10,6 +9,7 @@ public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
 
     int status = 0;
     String message;
+    int requestId; // source ?
 
     
     @Override
@@ -26,8 +26,9 @@ public class ErrorInboundHandler extends ChannelInboundHandlerAdapter{
         cause.printStackTrace();
     
 
-        ResponseProtos.Response res = ReqUtils.makeUpErrorResponse(this.status, this.message);
+        // Removed because requestId can not be extracted from Erroneous response. We back-off and try again. 
+        // ResponseProtos.Response res = RequestUtils.makeUpErrorResponse(this.status, this.message, this.requestId);
+        // ctx.writeAndFlush(res);
 
-        ctx.writeAndFlush(res);
     }
 }

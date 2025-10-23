@@ -6,26 +6,28 @@ import server.controllers.helpers.ResponseBuilders;
 
 public class CloseController {
 
-    private static Response CloseAcknowledgeResponse = Response.newBuilder()
-            .setStatus(200)
-            .setMessage("Closed connection successfully.")
-            .build();
+    private static Response makeCloseAcknowledgeResponse(int requestId) {
+        Response res = Response.newBuilder()
+                .setStatus(200)
+                .setMessage("Closed connection successfully.")
+                .setResponseId(requestId)
+                .build();
 
-            
+        return res;
+    }
+
     public static Response close(Request req) {
 
         Response res = null;
 
-
         if (!AuthController.authenticateToken(req.getToken())) {
-            res = CloseAcknowledgeResponse;
+            res = makeCloseAcknowledgeResponse(req.getRequestId());
 
         } else {
-            res = ResponseBuilders.InvalidTokenResponse;
+            res = ResponseBuilders.makeInvalidTokenResponse(req.getToken(), req.getRequestId());
         }
 
         return res;
-
     }
 
 }

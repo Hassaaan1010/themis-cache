@@ -1,6 +1,9 @@
 package server.handler;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+
+import com.google.protobuf.ByteString;
 
 import common.LogUtil;
 import common.parsing.protos.RequestProtos.Request;
@@ -23,10 +26,12 @@ import server.controllers.SetController;
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     private ByteBuf buf;
 
+    public static final HashMap<String, ByteString> Cache = new HashMap<>();
+
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         System.out.println("handlerAdded");
-        // TODO: Change constant init buffer capacity written as 4
+        // TODO: Remove? constant init buffer capacity written as 4
         buf = ctx.alloc().buffer(4); // (4 bytes)
         System.out.println("buffer added: " + buf.toString(StandardCharsets.UTF_8));
     }
@@ -41,7 +46,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
-            LogUtil.log("Reached channel read : ", "Got msg from client ", msg.toString());
+            LogUtil.log("Reached channel read.");
 
             Request req;
             Response res = null;
@@ -49,9 +54,9 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
             // Check correct format of request
             if (!(msg instanceof Request)) {
                 // throw new ChannelException("Request object is of wrong class :" +
-                // msg.getClass());
-                res = BadRequestController.invalidRequestClass();
-
+                
+                // res = BadRequestController.invalidRequestClass(Request.newBuilder().set);
+                LogUtil.log("Bad request send. Could not be casted to Request type.");
             } else {
                 // Cast to Request object from deserialized msg
                 req = (Request) msg;
@@ -75,6 +80,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                     case Action.AUTH:
                         res = AuthController.authenticate(req);
                         ctx.writeAndFlush(res);
+                        System.out.println("Response was writen and flushed.");
                         if (res.getStatus() >= 400) {
                             ctx.close();
                         }
@@ -83,13 +89,14 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                     case Action.CLOSE:
                         res = CloseController.close(req);
                         ctx.writeAndFlush(res);
-                        if (res.getStatus() == 200){
+                        if (res.getStatus() == 200) {
+                            AuthController.removeToken(req.getToken());
                             ctx.close();
                         }
                         return;
-                        
+
                     default:
-                        res = BadRequestController.invalidRequestMethod();
+                        res = BadRequestController.invalidRequestMethod(req.getRequestId());
                         ctx.writeAndFlush(res);
                         return;
                 }
