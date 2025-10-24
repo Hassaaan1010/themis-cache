@@ -2,7 +2,6 @@ package instance;
 
 import com.google.protobuf.ByteString;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import client.EchoClient;
@@ -39,8 +38,7 @@ public class Instance {
             // ByteString payloadValue = ByteString.copyFromUtf8(value);
 
             Path filePath = Path.of("/home/hassaan/Project/loadTestFiles/100_MB_FILE.bin");
-            byte[] fileBytes = Files.readAllBytes(filePath);
-            ByteString payloadValue = ByteString.copyFrom(fileBytes);
+            ByteString payloadValue = EchoClient.readFiletoByteString(filePath);
 
             Response setResponse = cacheClient.setKey("PING", payloadValue, false, false);
 

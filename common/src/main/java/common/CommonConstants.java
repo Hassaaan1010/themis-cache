@@ -26,7 +26,7 @@ public class CommonConstants {
         // ========================
         public static final int encryptOption = 1;              // 0000 0001
         public static final int compressOption = 2;             // 0000 0010
-        public static final int largePayloadOption = 3;         // 0000 0011
+        public static final int largePayloadOption = 4;         // 0000 0100
 
         // ========================
         // BASIC CONSTANTS

@@ -1,6 +1,5 @@
 package server.handler;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import com.google.protobuf.ByteString;
@@ -9,7 +8,6 @@ import common.LogUtil;
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
 import common.parsing.protos.RequestProtos.Action;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -25,25 +23,20 @@ import server.controllers.SetController;
 // import models.ResponseData;
 
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
-    private ByteBuf buf;
 
     public static final HashMap<String, ByteString> Cache = new HashMap<>();
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("handlerAdded");
-        // TODO: Remove? constant init buffer capacity written as 4
-        buf = ctx.alloc().buffer(4); // (4 bytes)
-        System.out.println("buffer added: " + buf.toString(StandardCharsets.UTF_8));
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("handlerAdded");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("handlerRemoved");
-        buf.release();
-        buf = null;
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("handlerRemoved");
     }
 
+    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
@@ -81,7 +74,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                     case Action.AUTH:
                         res = AuthController.authenticate(req);
                         ctx.writeAndFlush(res);
-                        System.out.println("Response was writen and flushed.");
+                        if (EchoServer.DEBUG_SERVER) LogUtil.log("Response was writen and flushed.");
                         if (res.getStatus() >= 400) {
                             ctx.close();
                         }

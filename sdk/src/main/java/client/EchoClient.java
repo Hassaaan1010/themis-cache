@@ -1,5 +1,8 @@
 package client;
 
+import java.io.BufferedInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -347,4 +350,17 @@ public class EchoClient {
         return authResponse;
     }
 
+    public static ByteString readFiletoByteString(Path filePath) {
+        try {
+            ByteString payloadValue = ByteString.readFrom(
+                    new BufferedInputStream(Files.newInputStream(filePath)));
+
+            return payloadValue;
+        } catch (Exception e) {
+            // TODO: handle exception
+            if (EchoClient.DEBUG_CLIENT)
+                LogUtil.log("Failed to read file into ByteString.", "Error", e);
+            throw new Error("File read failed.");
+        }
+    }
 }

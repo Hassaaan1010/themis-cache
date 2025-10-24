@@ -12,7 +12,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>sdk</artifactId>
-  <!-- <build>
+  <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -38,8 +38,29 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <!-- Change this to your server entrypoint class -->
+              <mainClass>instance.Instance</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>instance.Instance</mainClass>
+        </configuration>
+      </plugin>
     </plugins>
-  </build> -->
+  </build>
   <dependencies>
     <!-- Gson for JSON handling -->
     <dependency>
