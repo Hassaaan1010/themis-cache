@@ -12,10 +12,11 @@ public class CommonConstants {
         // ========================
         // TIMEOUT CONSTANTS
         // ========================
-        public static final long GET_REQUEST_TIMEOUT = 100;
-        public static final long SET_REQUEST_TIMEOUT = 1; // TODO: Potentially multiplied by a factor of length of payload. 
-        public static final long DEL_REQUEST_TIMEOUT = 5;
-        public static final long AUTH_REQUEST_TIMEOUT = 500; // DB read operation.
+        private static final int debugTimeoutCoeff = 10000;
+        public static final long GET_REQUEST_TIMEOUT = debugTimeoutCoeff * 100;
+        public static final long SET_REQUEST_TIMEOUT = debugTimeoutCoeff * 50; // Multiplied by a factor of length of payload. 
+        public static final long DEL_REQUEST_TIMEOUT = debugTimeoutCoeff * 50;
+        public static final long AUTH_REQUEST_TIMEOUT = debugTimeoutCoeff * 500; // DB read operation.
 
 
 
@@ -26,7 +27,8 @@ public class CommonConstants {
         // ========================
         public static final int encryptOption = 1;              // 0000 0001
         public static final int compressOption = 2;             // 0000 0010
-        public static final int largePayloadOption = 4;         // 0000 0100
+        public static final int bigPayloadOption = 4;           // 0000 0100
+        public static final int largePayloadOption = 8;         // 0000 1000
 
         // ========================
         // BASIC CONSTANTS
