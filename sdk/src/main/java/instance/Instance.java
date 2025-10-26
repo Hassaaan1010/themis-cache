@@ -59,7 +59,7 @@ public class Instance {
             }
 
             for (int i = 0; i < 1000; i++) {
-                Thread.sleep(1000);
+                Thread.sleep(500);
 
                 callGet("PING");
             }
