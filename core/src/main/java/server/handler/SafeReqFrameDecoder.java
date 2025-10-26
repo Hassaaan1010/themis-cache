@@ -81,7 +81,7 @@ public class SafeReqFrameDecoder extends ByteToMessageDecoder {
         }
         System.out.println("Frame size of Req: " + length);
         
-        // Success - extract the frame (WITHOUT the length prefix)
+        // Success - extract the frame (WITHOUT the length prefix) Does not duplicate frame.
         ByteBuf frame = in.readRetainedSlice(length);
         out.add(frame);
     }

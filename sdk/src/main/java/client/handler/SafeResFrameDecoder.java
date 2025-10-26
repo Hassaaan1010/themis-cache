@@ -66,7 +66,7 @@ public class SafeResFrameDecoder extends ByteToMessageDecoder {
         }
         System.out.println("Frame size of Res: " + frameLength);
         
-        // Extract frame (WITHOUT length prefix)
+        // Extract frame slice (WITHOUT length prefix). Does not duplicate frame.
         ByteBuf frame = in.readRetainedSlice(frameLength);
         out.add(frame);
     }

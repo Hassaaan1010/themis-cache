@@ -40,7 +40,7 @@ public class Instance {
             // String value = "PONG";
             // ByteString payloadValue = ByteString.copyFromUtf8(value);
 
-            Path filePath = Path.of("/home/hassaan/Project/loadTestFiles/10_MB_FILE.bin");
+            Path filePath = Path.of("/home/hassaan/Project/loadTestFiles/25_MB_FILE.bin");
             ByteString payloadValue = EchoClient.readFiletoByteString(filePath);
 
             System.out.println("File read to memory.");
@@ -58,18 +58,17 @@ public class Instance {
                 throw new Exception("Set request failed.");
             }
 
-            for (int i = 0; i < 100_000/2; i++) {
-                // Thread.sleep(2000);
+            for (int i = 0; i < 1000; i++) {
+                Thread.sleep(1000);
 
                 callGet("PING");
-
             }
 
             LogUtil.log("Completed successfully");
 
-	    for (int i = 0; i < 1_000_000; i++){
-	    }
-	    LogUtil.log("Looped successfully");
+	    // for (int i = 0; i < 100_000; i++){
+	    // }
+	    // LogUtil.log("Looped successfully");
 
         } catch (Exception e) {
             cacheClient.shutdown();

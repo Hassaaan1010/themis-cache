@@ -382,7 +382,7 @@ public class EchoClient {
             // ByteString payloadValue = ByteString.readFrom(
             //         new BufferedInputStream(Files.newInputStream(filePath)));
 
-            // Don't be paranoid. It's safe enough.
+            // read file → wrap → send → done. No modifications = perfectly safe
             byte[] data = Files.readAllBytes(filePath);
             ByteString payloadValue = UnsafeByteOperations.unsafeWrap(data);
             

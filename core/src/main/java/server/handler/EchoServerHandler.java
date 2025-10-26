@@ -11,6 +11,7 @@ import common.parsing.protos.RequestProtos.Action;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 import server.EchoServer;
 import server.controllers.AuthController;
 import server.controllers.BadRequestController;
@@ -28,35 +29,39 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("handlerAdded");
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("handlerAdded");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("handlerRemoved");
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("handlerRemoved");
     }
 
-    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Reached channel read.");
-
-            Request req;
-            Response res = null;
+            if (EchoServer.DEBUG_SERVER)
+                LogUtil.log("Reached channel read.");
 
             // Check correct format of request
             if (!(msg instanceof Request)) {
                 // throw new ChannelException("Request object is of wrong class :" +
-                
+
                 // res = BadRequestController.invalidRequestClass(Request.newBuilder().set);
-                if (EchoServer.DEBUG_SERVER) LogUtil.log("Bad request send. Could not be casted to Request type.");
+                if (EchoServer.DEBUG_SERVER)
+                    LogUtil.log("Bad request send. Could not be casted to Request type.");
             } else {
+                Request req;
+                Response res = null;
+                
                 // Cast to Request object from deserialized msg
                 req = (Request) msg;
 
-                if (EchoServer.DEBUG_SERVER) LogUtil.log("Request received successfully :", "Request", req, "Action:", req.getAction(), "Key: ",
-                        req.getKey());
+                if (EchoServer.DEBUG_SERVER)
+                    LogUtil.log("Request received successfully :", "Request", req, "Action:", req.getAction(), "Key: ",
+                            req.getKey());
 
                 switch (req.getAction()) {
                     case Action.GET:
@@ -74,7 +79,8 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                     case Action.AUTH:
                         res = AuthController.authenticate(req);
                         ctx.writeAndFlush(res);
-                        if (EchoServer.DEBUG_SERVER) LogUtil.log("Response was writen and flushed.");
+                        if (EchoServer.DEBUG_SERVER)
+                            LogUtil.log("Response was writen and flushed.");
                         if (res.getStatus() >= 400) {
                             ctx.close();
                         }
@@ -99,7 +105,10 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         } catch (
 
         Exception e) {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Channel read error:", "Error", e);
+            if (EchoServer.DEBUG_SERVER)
+                LogUtil.log("Channel read error:", "Error", e);
+        } finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 

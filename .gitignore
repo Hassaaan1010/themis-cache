@@ -23,6 +23,14 @@ common/target/
 *.tar.gz
 *.rar
 
+# Recording files
+core/jfr_recordings/*.jfr
+core/jfr_recordings/*.txt
+core/jfr_recordings/.run_counter
+sdk/jfr_recordings/*.jfr
+sdk/jfr_recordings/*.txt
+sdk/jfr_recordings/.run_counter
+
 # .env files
 *.env
 

@@ -10,6 +10,7 @@ import io.netty.channel.ChannelHandlerContext;
 import client.EchoClient;
 // import client.clientUtils.RequestUtils;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 
 public class EchoClientHandler extends ChannelInboundHandlerAdapter {
 
@@ -58,6 +59,9 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
         } catch (Exception e) {
             if (EchoClient.DEBUG_CLIENT) LogUtil.log("Error in Client channelRead:", "Response data", (Response) msg);
             ctx.close();
+        }
+        finally {
+            ReferenceCountUtil.release(msg);
         }
     }
 
