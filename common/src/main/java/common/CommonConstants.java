@@ -10,6 +10,12 @@ public class CommonConstants {
         public static final String SERVER_HOST = "localhost";
 
         // ========================
+        // RATE LIMITING CONSTANTS
+        // ========================
+        // TO DO: assuming single tenant for now. Should not be extremely tight as tenants express higher workload through requests.
+        public static final int RATE_LIMIT_PER_TENANT_PER_SECOND = 500;
+
+        // ========================
         // TIMEOUT CONSTANTS
         // ========================
         private static final int debugTimeoutCoeff = 10000;

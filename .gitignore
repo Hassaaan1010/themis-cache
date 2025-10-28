@@ -31,6 +31,9 @@ sdk/jfr_recordings/*.jfr
 sdk/jfr_recordings/*.txt
 sdk/jfr_recordings/.run_counter
 
+sdk/plots/*/*.csv
+sdl/plots/*/*.png
+
 # .env files
 *.env
 
