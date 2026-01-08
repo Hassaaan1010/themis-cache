@@ -11,7 +11,7 @@ import common.parsing.protos.ResponseProtos.Response;
 public class Instance {
     private static EchoClient cacheClient;
     private static final String PAYLOADS_DIR = "/home/hassaan/Project/testGen/payloads";
-    private static final int NUM_OPERATIONS = 2_000;
+    private static final int NUM_OPERATIONS = 100;
 
     // Store only file metadata, not the actual file data
     static class PayloadFile {

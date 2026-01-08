@@ -239,6 +239,7 @@ public final class ResponseProtos {
       return true;
     }
 
+    @SuppressWarnings("unchecked")
     @java.lang.Override
     public int hashCode() {
       if (memoizedHashCode != 0) {

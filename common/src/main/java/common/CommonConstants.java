@@ -56,8 +56,11 @@ public class CommonConstants {
 
         // Token (string) - field 2
         // Protobuf: tag (1 byte) + length varint (1 byte for 36) + data (36 bytes)
-        public static final int MAX_TOKEN_SIZE = VARINT_TAG_SIZE + INT_MIN + 36; // UUID is 36 chars
-        public static final int MIN_TOKEN_SIZE = VARINT_TAG_SIZE + INT_MIN + 36; // always 36 chars
+        // public static final int MAX_TOKEN_SIZE = VARINT_TAG_SIZE + INT_MIN + 36; // UUID is 36 chars
+        // public static final int MIN_TOKEN_SIZE = VARINT_TAG_SIZE + INT_MIN + 36; // always 36 chars
+        public static final int MAX_TOKEN_SIZE = VARINT_TAG_SIZE + INT_MIN + 32; // Murmur128 hash is 32 chars
+        public static final int MIN_TOKEN_SIZE = VARINT_TAG_SIZE + INT_MIN + 32; // always 32 chars
+
 
         // Key (string) - field 3
         // Protobuf: tag (1 byte) + length varint + data

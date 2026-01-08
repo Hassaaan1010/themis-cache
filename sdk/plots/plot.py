@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # load data
-folder_name="small_heap_tuned_zgc/" #example folderName/
+folder_name="unzipf_g1gc/" #example folderName/
 csv_file_name = folder_name + "latencies_detailed.csv"
 df = pd.read_csv(csv_file_name)
 

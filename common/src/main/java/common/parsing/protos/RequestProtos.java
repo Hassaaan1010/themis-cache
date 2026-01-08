@@ -472,6 +472,7 @@ public final class RequestProtos {
       return true;
     }
 
+    @SuppressWarnings("unchecked")
     @java.lang.Override
     public int hashCode() {
       if (memoizedHashCode != 0) {

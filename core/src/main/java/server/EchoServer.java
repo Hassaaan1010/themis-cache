@@ -16,6 +16,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 // import io.netty.handler.timeout.ReadTimeoutHandler;
+import server.daemons.TapDaemon;
 
 // import models.RequestData;
 // import models.ResponseData;
@@ -24,6 +25,7 @@ import server.handler.EchoServerHandler;
 import server.handler.SafeReqFrameDecoder;
 // import server.parsing.ByteBufServerCodec;
 import server.parsing.ProtobufServerCodec;
+import server.serverUtils.BucketsOwner;
 
 public class EchoServer {
 
@@ -98,10 +100,18 @@ public class EchoServer {
     }
 
     public static void main(String[] args) throws Exception {
-        EchoServer server = new EchoServer();
+        
+        // Bootstrap bucket owner
+        BucketsOwner tokenBuckets = new BucketsOwner();
 
+        // Start incrementer daemon
+        TapDaemon tapDaemon = new TapDaemon(tokenBuckets);
+        
+        EchoServer server = new EchoServer();
+        
         // Hook for Ctrl+C or SIGTERM
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(tapDaemon::shutdown));
 
         server.start();
     }

@@ -3,7 +3,7 @@ from scipy.stats import pearsonr, spearmanr
 import numpy as np
 
 # Load data
-folder_name = "zgb_10k_2gC_4gS/"
+folder_name = "unzipf_g1gc/"
 csv_file_name = folder_name + "latencies_detailed.csv"
 df = pd.read_csv(csv_file_name)
 

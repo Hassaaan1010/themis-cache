@@ -30,9 +30,10 @@ core/jfr_recordings/.run_counter
 sdk/jfr_recordings/*.jfr
 sdk/jfr_recordings/*.txt
 sdk/jfr_recordings/.run_counter
+latencies_*.csv
 
-sdk/plots/*/*.csv
-sdl/plots/*/*.png
+sdk/plots/
+# sdk/plots/
 
 # .env files
 *.env
@@ -40,3 +41,6 @@ sdl/plots/*/*.png
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# misc
+.idea
