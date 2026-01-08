@@ -23,13 +23,16 @@ import server.daemons.TapDaemon;
 
 import server.handler.EchoServerHandler;
 import server.handler.SafeReqFrameDecoder;
+import server.handler.TenantRateLimitHandler;
 // import server.parsing.ByteBufServerCodec;
 import server.parsing.ProtobufServerCodec;
 import server.serverUtils.BucketsOwner;
 
 public class EchoServer {
 
-    public static final boolean DEBUG_SERVER = false;
+    public static final boolean DEBUG_SERVER = true;
+
+    public BucketsOwner tokenBuckets;
 
     private final int port;
     private ChannelFuture channelFuture;
@@ -67,6 +70,8 @@ public class EchoServer {
                                     
                                     .addLast(new ProtobufVarint32LengthFieldPrepender())    // outbound length prepend
                                     .addLast(codec.newEncoder())                            // outbound protobuf encoder
+                                    
+                                    .addLast(new TenantRateLimitHandler(tokenBuckets))
                                     .addLast(new EchoServerHandler());                      // inbound business logic
                                     // .addLast(new ErrorInboundHandler());                    // inboundexception handling
                         }
@@ -101,15 +106,17 @@ public class EchoServer {
 
     public static void main(String[] args) throws Exception {
         
+        // init server
+        EchoServer server = new EchoServer();
+
         // Bootstrap bucket owner
-        BucketsOwner tokenBuckets = new BucketsOwner();
+        server.tokenBuckets = new BucketsOwner();
 
         // Start incrementer daemon
-        TapDaemon tapDaemon = new TapDaemon(tokenBuckets);
+        TapDaemon tapDaemon = new TapDaemon(server.tokenBuckets);
         
-        EchoServer server = new EchoServer();
         
-        // Hook for Ctrl+C or SIGTERM
+        // Hooks for Ctrl+C or SIGTERM
         Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
         Runtime.getRuntime().addShutdownHook(new Thread(tapDaemon::shutdown));
 

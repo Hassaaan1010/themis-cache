@@ -14,7 +14,7 @@ public class SetController {
         Response res;
 
         if (!AuthController.authenticateToken(req.getToken())) {
-            res = ResponseBuilders.makeInvalidTokenResponse(req.getToken(), req.getRequestId());
+            res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
         } else {
             GetController.Cache.put(req.getKey(), req.getValue());
 

@@ -7,12 +7,14 @@ import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
 
+import common.LogUtil;
 import db.MongoService;
+import server.EchoServer;
 import server.controllers.AuthController;
 
 public class BucketsOwner {
 
-    final private int MAX_BUCKET_CAP = 300;
+    final private int MAX_BUCKET_CAP = 20;
     final private int BUCKET_INCREMENT = 10;
 
     private HashMap<String, AtomicInteger> tokenBuckets = new HashMap<>();
@@ -31,6 +33,7 @@ public class BucketsOwner {
 
             tokenBuckets.put(hash, new AtomicInteger(MAX_BUCKET_CAP));
         }
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("Bucket has been initialized","buckets", tokenBuckets.toString());
     }
 
     public AtomicInteger getBucketOfTenant(String hash) {
@@ -56,8 +59,13 @@ public class BucketsOwner {
     }
 
     public boolean decrementBucket(String token) {
-        // Each bucket decrement has to be done in lock since concurrent decrements will
-        // corrupt bucket.
+
+        // Unrecognized tenant tokens are treated as having max rate limit as 0.
+        if (!tokenBuckets.containsKey(token)) {
+            return false; 
+        }
+        
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("Token received for decrement:","token",token);
         AtomicInteger bucket = tokenBuckets.get(token);
 
         // check if tokens not left, return false
@@ -71,6 +79,12 @@ public class BucketsOwner {
                 return true;
             }
         }
+    }
+
+    public Object getBuckets() {
+        // TODO Auto-generated method stub
+        return tokenBuckets.toString();
+        // throw new UnsupportedOperationException("Unimplemented method 'printBucket'");
     }
 
 }

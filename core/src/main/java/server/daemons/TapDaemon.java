@@ -6,7 +6,7 @@ import server.serverUtils.BucketsOwner;
 
 public class TapDaemon implements Runnable {
 
-    final private int SLEEP_INTERVAL = 10;
+    final private int SLEEP_INTERVAL = 500;
     final private BucketsOwner bucketsOwner;
     final private Thread tapThread;
 
@@ -14,7 +14,7 @@ public class TapDaemon implements Runnable {
 
     public TapDaemon(BucketsOwner buckets) {
         this.bucketsOwner = buckets;
-        this.tapThread = new Thread("TapThread");
+        this.tapThread = new Thread(this, "TapThread");
         this.tapThread.setDaemon(true);
         this.tapThread.start();
     }
@@ -24,6 +24,7 @@ public class TapDaemon implements Runnable {
 
         while (running) {
             try {
+                LogUtil.log("Tap Daemon is filling buckets");
                 this.bucketsOwner.incrementBuckets();
                 Thread.sleep(SLEEP_INTERVAL);
             } catch (InterruptedException e) {

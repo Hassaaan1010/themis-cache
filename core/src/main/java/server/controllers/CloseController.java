@@ -24,7 +24,7 @@ public class CloseController {
             res = makeCloseAcknowledgeResponse(req.getRequestId());
 
         } else {
-            res = ResponseBuilders.makeInvalidTokenResponse(req.getToken(), req.getRequestId());
+            res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
         }
 
         return res;

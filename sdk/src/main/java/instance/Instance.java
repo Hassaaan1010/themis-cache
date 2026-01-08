@@ -82,6 +82,11 @@ public class Instance {
                 double latencyMs = (endTime - startTime) / 1_000_000.0;
                 setLatencies.add(latencyMs);
 
+                if (setResponse.getStatus() == 429) {
+                    LogUtil.log("Need to slow down");
+                    Thread.sleep(700);
+                }
+
                 if (setResponse.getStatus() != 201) {
                     LogUtil.log("SET failed for key:", file.key, "Status:", setResponse.getStatus());
                 }
@@ -104,6 +109,11 @@ public class Instance {
                 getLatencies.add(latencyMs);
 
                 fileSizes.add(getResponse.getValue().size());
+
+                if (getResponse.getStatus() == 429) {
+                    LogUtil.log("Need to slow down");
+                    Thread.sleep(700);
+                }
 
                 if (getResponse.getStatus() != 200) {
                     LogUtil.log("GET failed for key:", file.key, "Status:", getResponse.getStatus());

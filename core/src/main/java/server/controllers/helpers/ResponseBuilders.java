@@ -8,7 +8,7 @@ import common.parsing.protos.ResponseProtos;
 
 public class ResponseBuilders {
 
-    public static Response makeInvalidTokenResponse(String token, int requestId) {
+    public static Response makeInvalidTokenResponse(int requestId) {
 
         Response res = Response.newBuilder()
                 .setStatus(401)
@@ -18,6 +18,16 @@ public class ResponseBuilders {
 
         return res;
 
+    }
+
+    public static Response makeRateLimitResponse(int requestId) {
+        Response res = Response.newBuilder()
+                .setStatus(429)
+                .setMessage("Rate limit reached. Slow down requests")
+                .setResponseId(requestId)
+                .build();
+        
+        return res;
     }
 
     public static ResponseProtos.Response makeResponse(int status, String message, ByteString value, int requestId) {

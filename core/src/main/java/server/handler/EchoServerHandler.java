@@ -28,22 +28,10 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     public static final HashMap<String, ByteString> Cache = new HashMap<>();
 
     @Override
-    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        if (EchoServer.DEBUG_SERVER)
-            LogUtil.log("handlerAdded");
-    }
-
-    @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        if (EchoServer.DEBUG_SERVER)
-            LogUtil.log("handlerRemoved");
-    }
-
-    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
             if (EchoServer.DEBUG_SERVER)
-                LogUtil.log("Reached channel read.");
+                LogUtil.log("Reached channel handler.");
 
             // Check correct format of request
             if (!(msg instanceof Request)) {
@@ -60,8 +48,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                 req = (Request) msg;
 
                 if (EchoServer.DEBUG_SERVER)
-                    LogUtil.log("Request received successfully :", "Request", req, "Action:", req.getAction(), "Key: ",
-                            req.getKey());
+                    LogUtil.log("Request received successfully :", "Request key", req.getKey(), "Action:", req.getAction());
 
                 switch (req.getAction()) {
                     case Action.GET:
@@ -110,6 +97,18 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         } finally {
             ReferenceCountUtil.release(msg);
         }
+    }
+
+    @Override
+    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("handlerAdded");
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("handlerRemoved");
     }
 
     @Override
