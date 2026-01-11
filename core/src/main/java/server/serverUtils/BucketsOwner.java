@@ -14,8 +14,8 @@ import server.controllers.AuthController;
 
 public class BucketsOwner {
 
-    final private int MAX_BUCKET_CAP = 20;
-    final private int BUCKET_INCREMENT = 10;
+    final private int MAX_BUCKET_CAP = 1000;
+    final private int BUCKET_INCREMENT = 100;
 
     private HashMap<String, AtomicInteger> tokenBuckets = new HashMap<>();
 
@@ -58,7 +58,7 @@ public class BucketsOwner {
         }
     }
 
-    public boolean decrementBucket(String token) {
+    public boolean tryBucketDecrement(String token) {
 
         // Unrecognized tenant tokens are treated as having max rate limit as 0.
         if (!tokenBuckets.containsKey(token)) {

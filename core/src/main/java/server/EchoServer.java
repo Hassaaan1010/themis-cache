@@ -15,11 +15,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import queue.CommandQueue;
 // import io.netty.handler.timeout.ReadTimeoutHandler;
-import server.daemons.TapDaemon;
-
-// import models.RequestData;
-// import models.ResponseData;
+import server.daemons.BucketDaemon;
 
 import server.handler.EchoServerHandler;
 import server.handler.SafeReqFrameDecoder;
@@ -33,20 +31,42 @@ public class EchoServer {
     public static final boolean DEBUG_SERVER = true;
 
     public BucketsOwner tokenBuckets;
+    public BucketDaemon tapDaemon;
+
+    private final CommandQueue queue;
 
     private final int port;
     private ChannelFuture channelFuture;
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
 
-    public EchoServer() {
+    public EchoServer(CommandQueue queue) throws Exception {
         this.port = CommonConstants.SERVER_PORT;
+
+        this.queue = queue;
+        
+        try {
+            // Bootstrap bucket owner  
+            this.tokenBuckets = new BucketsOwner();
+    
+            // Init and Start incrementer daemon
+            tapDaemon = new BucketDaemon(this.tokenBuckets);
+    
+            // Server hooks for shutdown
+            Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
+    
+        } catch (Exception e) {
+            LogUtil.log("Echo Server Initialization failed.","Exception", e);
+        }
     }
 
     public void start() throws Exception {
         try {
             // Force MongoService class to load and initialize DB
             Class.forName("db.MongoService");
+
+            // Start Tap Daemon
+            this.tapDaemon.start();
 
             // Initialize Netty
 
@@ -72,7 +92,7 @@ public class EchoServer {
                                     .addLast(codec.newEncoder())                            // outbound protobuf encoder
                                     
                                     .addLast(new TenantRateLimitHandler(tokenBuckets))
-                                    .addLast(new EchoServerHandler());                      // inbound business logic
+                                    .addLast(new EchoServerHandler(queue));                      // inbound business logic
                                     // .addLast(new ErrorInboundHandler());                    // inboundexception handling
                         }
                     });
@@ -82,7 +102,7 @@ public class EchoServer {
             channelFuture.channel().closeFuture().sync();
 
         } catch (Exception e) {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Echo Server initialization : ", "Error", e);
+            if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Echo Server starting : ", "Error", e);
         } finally {
             if (EchoServer.DEBUG_SERVER) LogUtil.log("Shutting down server thread groups.");
             bossGroup.shutdownGracefully();
@@ -104,22 +124,4 @@ public class EchoServer {
         MongoService.closeClient();
     }
 
-    public static void main(String[] args) throws Exception {
-        
-        // init server
-        EchoServer server = new EchoServer();
-
-        // Bootstrap bucket owner
-        server.tokenBuckets = new BucketsOwner();
-
-        // Start incrementer daemon
-        TapDaemon tapDaemon = new TapDaemon(server.tokenBuckets);
-        
-        
-        // Hooks for Ctrl+C or SIGTERM
-        Runtime.getRuntime().addShutdownHook(new Thread(server::shutdown));
-        Runtime.getRuntime().addShutdownHook(new Thread(tapDaemon::shutdown));
-
-        server.start();
-    }
 }

@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import server.EchoServer;
+import server.controllers.AuthController;
 import server.controllers.helpers.ResponseBuilders;
 import server.serverUtils.BucketsOwner;
 
@@ -39,20 +40,21 @@ public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
                
                 // Cast to Request object from deserialized msg
                 Request req = (Request) msg;
+                String tenantToken;
 
+                // If AUTH req, make token from id, password
                 if (req.getAction() == Action.AUTH) {
-                    ctx.fireChannelRead(msg);
-                    // TODO: Auth DoS needs to be rate limited generically.
+                    tenantToken = AuthController.getHash.apply(req.getKey(), req.getValue().toStringUtf8());
+                } else {
+                    tenantToken = req.getToken();
                 }
 
-                String tenantToken = req.getToken();
-
-                if (!this.tokenBuckets.decrementBucket(tenantToken)){
+                // Rate limit check
+                if (!this.tokenBuckets.tryBucketDecrement(tenantToken)){
                     Response res = ResponseBuilders.makeRateLimitResponse(req.getRequestId());
                     ctx.writeAndFlush(res);
 
                     if (EchoServer.DEBUG_SERVER) LogUtil.log("Hit rate limit. Slow down");
-
                     return;
                     
                 } else {

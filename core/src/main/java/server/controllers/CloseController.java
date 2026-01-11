@@ -2,7 +2,6 @@ package server.controllers;
 
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
-import server.controllers.helpers.ResponseBuilders;
 
 public class CloseController {
 
@@ -20,12 +19,9 @@ public class CloseController {
 
         Response res = null;
 
-        if (!AuthController.authenticateToken(req.getToken())) {
-            res = makeCloseAcknowledgeResponse(req.getRequestId());
-
-        } else {
-            res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
-        }
+        AuthController.removeToken(req.getToken());
+        
+        res = makeCloseAcknowledgeResponse(req.getRequestId());
 
         return res;
     }

@@ -4,20 +4,20 @@ import common.LogUtil;
 import server.EchoServer;
 import server.serverUtils.BucketsOwner;
 
-public class TapDaemon implements Runnable {
+public class BucketDaemon implements Runnable {
 
     final private int SLEEP_INTERVAL = 500;
     final private BucketsOwner bucketsOwner;
     final private Thread tapThread;
 
-    private volatile boolean running = true;
+    private volatile boolean running;
 
-    public TapDaemon(BucketsOwner buckets) {
+    public BucketDaemon(BucketsOwner buckets) {
         this.bucketsOwner = buckets;
         this.tapThread = new Thread(this, "TapThread");
         this.tapThread.setDaemon(true);
-        this.tapThread.start();
     }
+
 
     @Override
     public void run() {
@@ -38,6 +38,11 @@ public class TapDaemon implements Runnable {
             }
         };
 
+    }
+
+    public void start() {
+        this.running = true;
+        this.tapThread.start();
     }
 
     public void shutdown() {

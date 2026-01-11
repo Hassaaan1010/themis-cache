@@ -5,34 +5,33 @@ import java.util.HashMap;
 import com.google.protobuf.ByteString;
 
 import common.parsing.protos.RequestProtos.Request;
-import common.parsing.protos.ResponseProtos.Response;
-import io.netty.channel.ChannelHandlerContext;
-import server.controllers.helpers.ResponseBuilders;
+import io.netty.channel.Channel;
+import queue.interfaces.Get;
 
 public class GetController {
 
     public static final HashMap<String, ByteString> Cache = new HashMap<>();
 
-    static {
-        Cache.put("PING", ByteString.copyFromUtf8("PONG"));
+    public static Get get(Channel channel, Request req) {
+        return new Get(channel, req.getToken(), req.getRequestId(), req.getKey());
     }
 
-    public static void get(ChannelHandlerContext ctx, Request req) {
-    Response res;
+    // static {
+    // Cache.put("PING", ByteString.copyFromUtf8("PONG"));
+    // }
 
-    if (!AuthController.authenticateToken(req.getToken())) {
-        res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
-    } else {
-        ByteString val = Cache.get(req.getKey());
-        
-        if (val == null) {
-            res = ResponseBuilders.keyNotFoundResponse(404, "Key not found", req.getRequestId());
-        } else {
-            res = ResponseBuilders.makeGetResponse(200, "Key was found successfully.", val, req.getRequestId());
-        }
-    }
+    // public static Get get(Request req) {
 
-    ctx.writeAndFlush(res);
-}
+    // res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
 
+    // ByteString val = Cache.get(req.getKey());
+    // if (val == null) {
+    // res = ResponseBuilders.keyNotFoundResponse(404, "Key not found",
+    // req.getRequestId());
+    // } else {
+    // res = ResponseBuilders.makeGetResponse(200, "Key was found.", val,
+    // req.getRequestId());
+    // }
+
+    // }
 }

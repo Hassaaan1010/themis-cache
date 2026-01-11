@@ -1,24 +1,15 @@
 package server.controllers;
 
 import common.parsing.protos.RequestProtos.Request;
-import common.parsing.protos.ResponseProtos.Response;
-import io.netty.channel.ChannelHandlerContext;
-import server.controllers.helpers.ResponseBuilders;
+import io.netty.channel.Channel;
+import queue.interfaces.Evict;
 
 public class DelController {
 
-    public static void delete(ChannelHandlerContext ctx, Request req) {
+    public static Evict delete( Channel channel, Request req) {
 
-        Response res;
-
-        if (!AuthController.authenticateToken(req.getToken())) {
-            res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
-        } else {
-            res = ResponseBuilders.makeDelResponse(204,"Key value pair deleted.",req.getRequestId() );
-        }
-
-        ctx.writeAndFlush(res);
-        return;
+        Evict cmd = new Evict(channel, req.getToken(), req.getRequestId(), req.getKey());
+        return cmd;
     }
 
 }
