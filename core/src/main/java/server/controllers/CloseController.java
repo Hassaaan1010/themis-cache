@@ -19,8 +19,6 @@ public class CloseController {
 
         Response res = null;
 
-        AuthController.removeToken(req.getToken());
-        
         res = makeCloseAcknowledgeResponse(req.getRequestId());
 
         return res;

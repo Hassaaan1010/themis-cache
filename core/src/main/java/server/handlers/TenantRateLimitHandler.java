@@ -1,4 +1,4 @@
-package server.handler;
+package server.handlers;
 
 import common.LogUtil;
 import common.parsing.protos.RequestProtos.Action;
@@ -44,7 +44,7 @@ public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
 
                 // If AUTH req, make token from id, password
                 if (req.getAction() == Action.AUTH) {
-                    tenantToken = AuthController.getHash.apply(req.getKey(), req.getValue().toStringUtf8());
+                    tenantToken = AuthController.getMurmurHash.apply(req.getKey(), req.getValue().toStringUtf8());
                 } else {
                     tenantToken = req.getToken();
                 }

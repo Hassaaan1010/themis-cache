@@ -2,43 +2,43 @@ package db;
 
 import org.bson.Document;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import common.LogUtil;
-import commonCore.EnvConfig;
-import server.EchoServer;;
+import server.EchoServer;
 
 public class MongoService {
 
-    private static final MongoClient client;
-    public static final MongoDatabase db;
-    public static final MongoCollection<Document> UserCollection;
+    private final MongoClient client;
+    private final MongoDatabase db;
+    private final MongoCollection<Document> userCollection;
 
-    static {
-        client = MongoClients.create(EnvConfig.DB_URI_STRING);
-        db = client.getDatabase(EnvConfig.DB_NAME);
+    private final FindIterable<Document> allUserDocs;
 
-        
+    public MongoService(String uri, String dbName) {
+        System.out.println("Debug " + uri + " " + dbName);
+        this.client = MongoClients.create(uri);
+        this.db = client.getDatabase(dbName);
         if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ MongoDB Initialized.");
 
 
-        // collections
-        UserCollection = db.getCollection("Users");
+        this.userCollection = db.getCollection("Users");
+        
+        allUserDocs = userCollection.find();
+
         if (EchoServer.DEBUG_SERVER) LogUtil.log("Users collection initialized successfully.");
     }
 
-
-    public static MongoDatabase getDb() {
-        return db;
+    public FindIterable<Document> getAllFromUserCollection() {
+        return allUserDocs;
     }
 
-    public static void closeClient() {
+    public void shutdown() {
         client.close();
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("MongoDB closed gracefully.");
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ MongoDB closed gracefully.");
     }
-
-    private MongoService() {};
 }

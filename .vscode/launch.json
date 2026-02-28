@@ -14,6 +14,17 @@
       "request": "launch",
       "mainClass": "instance.Instance",
       "projectName": "sdk"
+    },
+    {
+      "type": "java",
+      "name": "Core: Main ",
+      "request": "launch",
+      "mainClass": "Main",
+      "projectName": "core",
+      "env": {
+        "DB_CONNECTION_STRING": "mongodb://localhost:27017",
+        "DB_NAME": "ThemisDB"
+      }
     }
   ]
 }

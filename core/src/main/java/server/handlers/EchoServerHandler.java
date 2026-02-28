@@ -1,13 +1,14 @@
-package server.handler;
+package server.handlers;
 
 import java.util.HashMap;
 
 import com.google.protobuf.ByteString;
 
+import application.AppContext;
 import common.LogUtil;
+import common.parsing.protos.RequestProtos.Action;
 import common.parsing.protos.RequestProtos.Request;
 import common.parsing.protos.ResponseProtos.Response;
-import common.parsing.protos.RequestProtos.Action;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,13 +27,20 @@ import server.controllers.helpers.ResponseBuilders;
 
 // import models.RequestData;
 // import models.ResponseData;
-
 public class EchoServerHandler extends ChannelInboundHandlerAdapter {
+
+    private final AppContext context;
 
     private final CommandQueue cmdQueue;
 
-    public EchoServerHandler(CommandQueue queue) {
-        this.cmdQueue = queue;
+    private final AuthController authController;
+
+    public EchoServerHandler(AppContext context) {
+        this.context = context;
+        this.cmdQueue = this.context.getCommandQueue();
+
+        // Init Controllers
+        this.authController = new AuthController(context);
     }
 
     public static final HashMap<String, ByteString> Cache = new HashMap<>();
@@ -40,15 +48,18 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws ChannelException {
         try {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Reached channel handler.");
+            if (EchoServer.DEBUG_SERVER) {
+                LogUtil.log("Reached channel handler.");
+            }
 
             // Check correct format of request
             if (!(msg instanceof Request)) {
                 // res = BadRequestController.invalidRequestClass(Request.newBuilder().set);
-                if (EchoServer.DEBUG_SERVER) LogUtil.log("Bad request sent. Could not be casted to Request type.");
+                if (EchoServer.DEBUG_SERVER) {
+                    LogUtil.log("Bad request sent. Could not be casted to Request type.");
+                }
                 ctx.close();
             }
-
 
             Response res = null;
             CacheCommand cmd = null;
@@ -57,37 +68,32 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
             Request req = (Request) msg;
             Channel channel = ctx.channel();
 
-            if (EchoServer.DEBUG_SERVER)
+            if (EchoServer.DEBUG_SERVER) {
                 LogUtil.log("Request received successfully :", "Request key", req.getKey(), "Action:", req.getAction());
+            }
 
             // Authenticate request
             if (!(req.getAction() == Action.AUTH)) {
-                if (!AuthController.authenticateToken(req.getToken())) {
+                if (!authController.authenticateToken(req.getToken())) {
                     res = ResponseBuilders.makeInvalidTokenResponse(req.getRequestId());
                     ctx.writeAndFlush(res);
                     return;
-                }  
-            } 
+                }
+            }
 
             // Make cmd or req
             switch (req.getAction()) {
-                case Action.GET:
-                    cmd = GetController.get(channel, req);
+                case Action.GET -> cmd = GetController.get(channel, req);
 
-                case Action.SET:
-                    cmd = SetController.set(channel, req);
+                case Action.SET -> cmd = SetController.set(channel, req);
 
-                case Action.DEL:
-                    cmd = DelController.delete(channel, req);
+                case Action.DEL -> cmd = DelController.delete(channel, req);
 
-                case Action.AUTH:
-                    res = AuthController.authenticate(req);
+                case Action.AUTH -> res = authController.authenticate(req);
 
-                case Action.CLOSE:
-                    res = CloseController.close(req);
+                case Action.CLOSE -> res = CloseController.close(req);
 
-                default:
-                    res = BadRequestController.invalidRequestMethod(req.getRequestId());
+                default -> res = BadRequestController.invalidRequestMethod(req.getRequestId());
             }
 
             // Command exists : GET, SET, DEL
@@ -95,29 +101,32 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                 cmdQueue.enqueue(cmd);
                 return;
             }
-            
+
             // Immediate return for AUTH, CLOSE
-            if (req.getAction() == Action.AUTH || req.getAction() == Action.CLOSE) { 
+            if (req.getAction() == Action.AUTH || req.getAction() == Action.CLOSE) {
                 // Flush in all cases
                 ctx.writeAndFlush(res);
 
                 // Conditional closing of channel
-                if ( (req.getAction() == Action.AUTH && res.getStatus() >= 400)  // Auth fail
-                  || (req.getAction() == Action.CLOSE && res.getStatus() == 200) // Req to close
-                ) {
+                if ((req.getAction() == Action.AUTH && res.getStatus() >= 400) // Auth fail
+                        || (req.getAction() == Action.CLOSE && res.getStatus() == 200) // Req to close
+                        ) {
                     ctx.close();
                 } else {
                     LogUtil.log("res != null condition", "Action", req.getAction());
                 }
 
-                if (EchoServer.DEBUG_SERVER) LogUtil.log("Response was writen and flushed.");
+                if (EchoServer.DEBUG_SERVER) {
+                    LogUtil.log("Response was writen and flushed.");
+                }
             }
-
 
             return;
 
         } catch (Exception e) {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Channel read error:", "Error", e);
+            if (EchoServer.DEBUG_SERVER) {
+                LogUtil.log("Channel read error:", "Error", e);
+            }
         } finally {
             ReferenceCountUtil.release(msg);
         }
@@ -125,14 +134,16 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-        if (EchoServer.DEBUG_SERVER)
+        if (EchoServer.DEBUG_SERVER) {
             LogUtil.log("handlerAdded");
+        }
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        if (EchoServer.DEBUG_SERVER)
+        if (EchoServer.DEBUG_SERVER) {
             LogUtil.log("handlerRemoved");
+        }
     }
 
     @Override

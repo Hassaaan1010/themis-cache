@@ -1,4 +1,4 @@
-package server.handler;
+package server.handlers;
 
 import server.EchoServer;
 import server.serverUtils.EchoException;

@@ -22,18 +22,18 @@ public class BucketsOwner {
     // private BiFunction<String, String, String> getHash = (id, password) ->
     // String.valueOf((id + password).hashCode());
 
-    public BucketsOwner() {
+    public BucketsOwner(MongoService mongoService) {
         // Initialize
-        FindIterable<Document> allTenants = MongoService.UserCollection.find();
+        FindIterable<Document> allTenants = mongoService.getAllFromUserCollection();
 
         for (Document tenant : allTenants) {
-            String hash = AuthController.getHash.apply(
+            String hash = AuthController.getMurmurHash.apply(
                     tenant.getObjectId("_id").toString(),
                     tenant.getString("password"));
 
             tokenBuckets.put(hash, new AtomicInteger(MAX_BUCKET_CAP));
         }
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("Bucket has been initialized","buckets", tokenBuckets.toString());
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Create Bucket Owner","buckets", tokenBuckets.toString());
     }
 
     public AtomicInteger getBucketOfTenant(String hash) {

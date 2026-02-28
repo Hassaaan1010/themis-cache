@@ -24,7 +24,6 @@ public class BucketDaemon implements Runnable {
 
         while (running) {
             try {
-                LogUtil.log("Tap Daemon is filling buckets");
                 this.bucketsOwner.incrementBuckets();
                 Thread.sleep(SLEEP_INTERVAL);
             } catch (InterruptedException e) {
@@ -33,7 +32,7 @@ public class BucketDaemon implements Runnable {
                 Thread.currentThread().interrupt();
             } catch (Throwable t) {
                 if (EchoServer.DEBUG_SERVER) {
-                    LogUtil.log("TapDaemon crashed", "ERROR", t.getStackTrace());
+                    LogUtil.log("Bucket Daemon crashed", "ERROR", t.getStackTrace());
                 }
             }
         };
@@ -43,10 +42,15 @@ public class BucketDaemon implements Runnable {
     public void start() {
         this.running = true;
         this.tapThread.start();
+        
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Started Bucket Daemon");
     }
 
     public void shutdown() {
         this.running = false;
         this.tapThread.interrupt();
+
+        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Shutdown Bucket Daemon");
+
     }
 }

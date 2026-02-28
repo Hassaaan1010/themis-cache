@@ -1,13 +1,13 @@
 package server;
 
+
+
+import application.AppContext;
 import common.CommonConstants;
+import common.LogUtil;
 import common.interfaces.Codec;
 import common.parsing.protos.RequestProtos;
 import common.parsing.protos.ResponseProtos;
-import common.LogUtil;
-
-import db.MongoService;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -15,42 +15,32 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import queue.CommandQueue;
-// import io.netty.handler.timeout.ReadTimeoutHandler;
-import server.daemons.BucketDaemon;
-
-import server.handler.EchoServerHandler;
-import server.handler.SafeReqFrameDecoder;
-import server.handler.TenantRateLimitHandler;
-// import server.parsing.ByteBufServerCodec;
+import server.handlers.EchoServerHandler;
+import server.handlers.SafeReqFrameDecoder;
+import server.handlers.TenantRateLimitHandler;
 import server.parsing.ProtobufServerCodec;
 import server.serverUtils.BucketsOwner;
 
-public class EchoServer {
+
+public class EchoServer{
 
     public static final boolean DEBUG_SERVER = true;
 
-    public BucketsOwner tokenBuckets;
-    public BucketDaemon tapDaemon;
-
-    private final CommandQueue queue;
+    private final AppContext context; 
+    private final BucketsOwner tokenBuckets;
 
     private final int port;
     private ChannelFuture channelFuture;
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
 
-    public EchoServer(CommandQueue queue) throws Exception {
+    public EchoServer(AppContext context ) throws Exception {
         this.port = CommonConstants.SERVER_PORT;
-
-        this.queue = queue;
         
+        this.context = context;
+        this.tokenBuckets = this.context.getBucketsOwner();
         try {
             // Bootstrap bucket owner  
-            this.tokenBuckets = new BucketsOwner();
-    
-            // Init and Start incrementer daemon
-            tapDaemon = new BucketDaemon(this.tokenBuckets);
     
             // Server hooks for shutdown
             Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
@@ -62,11 +52,9 @@ public class EchoServer {
 
     public void start() throws Exception {
         try {
-            // Force MongoService class to load and initialize DB
-            Class.forName("db.MongoService");
 
-            // Start Tap Daemon
-            this.tapDaemon.start();
+            // // Start Tap Daemon
+            // this.tapDaemon.start();
 
             // Initialize Netty
 
@@ -92,8 +80,8 @@ public class EchoServer {
                                     .addLast(codec.newEncoder())                            // outbound protobuf encoder
                                     
                                     .addLast(new TenantRateLimitHandler(tokenBuckets))
-                                    .addLast(new EchoServerHandler(queue));                      // inbound business logic
-                                    // .addLast(new ErrorInboundHandler());                    // inboundexception handling
+                                    .addLast(new EchoServerHandler(context));               // inbound business logic
+                                    // .addLast(new ErrorInboundHandler());                 // inboundexception handling
                         }
                     });
 
@@ -101,7 +89,7 @@ public class EchoServer {
             if (EchoServer.DEBUG_SERVER) LogUtil.log("Server started:", "Port", port);
             channelFuture.channel().closeFuture().sync();
 
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Echo Server starting : ", "Error", e);
         } finally {
             if (EchoServer.DEBUG_SERVER) LogUtil.log("Shutting down server thread groups.");
@@ -121,7 +109,6 @@ public class EchoServer {
         if (workerGroup != null) {
             workerGroup.shutdownGracefully();
         }
-        MongoService.closeClient();
     }
 
 }

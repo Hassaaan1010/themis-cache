@@ -22,11 +22,11 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <!-- <archive>
+          <archive>
             <manifest>
-              <mainClass>server.EchoServer</mainClass>
+              <mainClass>Main</mainClass>
             </manifest>
-          </archive> -->
+          </archive>
         </configuration>
         <executions>
           <execution>
