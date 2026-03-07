@@ -1,25 +1,32 @@
 package queue;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import common.LogUtil;
-import commonCore.CoreConstants;
-import io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueue;
 import queue.interfaces.CacheCommand;
 import server.EchoServer;
 
 public class CommandQueue {
-    private MpscArrayQueue<CacheCommand> queue;
 
-    public CommandQueue () {
-        this.queue = new MpscArrayQueue<>( CoreConstants.QUEUE_CAPACITY);
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Created Command Queue");
+    // private MpscArrayQueue<CacheCommand> queue;
+    private final BlockingQueue<CacheCommand> queue;
+
+    public CommandQueue() {
+        // this.queue = new MpscArrayQueue<>( CoreConstants.QUEUE_CAPACITY);
+        this.queue = new LinkedBlockingQueue<>();
+        if (EchoServer.DEBUG_SERVER) {
+            LogUtil.log("✅ Created Command Queue");
+        }
 
     }
 
-    public void enqueue(CacheCommand cmd) {
-        queue.offer(cmd);
+    public void offer(CacheCommand cmd) {
+        queue.offer(cmd); // Adds to queue and fails silently if queue is full. Ideally for this system queue size should never be the bottle neck
     }
 
-    public CacheCommand dequeue() {
-        return queue.poll();
+    public CacheCommand poll() throws InterruptedException {
+        return queue.take();
     }
-}   
+
+}

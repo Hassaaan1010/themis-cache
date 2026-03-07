@@ -7,4 +7,7 @@ import com.google.protobuf.ByteString;
 public interface EvictionDecider {
 
     String evict(Map<String, ByteString> cache);
+
+
+    void Rebalance();
 } 

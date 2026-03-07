@@ -12,5 +12,11 @@ public class FairCachePolicy implements EvictionDecider {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'evict'");
     }
+
+    @Override
+    public void Rebalance() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'Rebalance'");
+    }
     
 }

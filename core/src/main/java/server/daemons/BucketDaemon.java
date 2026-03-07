@@ -27,7 +27,7 @@ public class BucketDaemon implements Runnable {
                 this.bucketsOwner.incrementBuckets();
                 Thread.sleep(SLEEP_INTERVAL);
             } catch (InterruptedException e) {
-                // interruption is the only sane shutdown signal
+                // Interruption is the only sane shutdown signal
                 running = false;
                 Thread.currentThread().interrupt();
             } catch (Throwable t) {
@@ -35,7 +35,7 @@ public class BucketDaemon implements Runnable {
                     LogUtil.log("Bucket Daemon crashed", "ERROR", t.getStackTrace());
                 }
             }
-        };
+        }
 
     }
 

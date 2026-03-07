@@ -83,23 +83,33 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
             // Make cmd or req
             switch (req.getAction()) {
-                case Action.GET -> cmd = GetController.get(channel, req);
+                case Action.GET ->
+                    cmd = GetController.get(channel, req);
 
-                case Action.SET -> cmd = SetController.set(channel, req);
+                case Action.SET ->
+                    cmd = SetController.set(channel, req);
 
-                case Action.DEL -> cmd = DelController.delete(channel, req);
+                case Action.DEL ->
+                    cmd = DelController.delete(channel, req);
 
-                case Action.AUTH -> res = authController.authenticate(req);
+                case Action.AUTH ->
+                    res = authController.authenticate(req);
 
-                case Action.CLOSE -> res = CloseController.close(req);
+                case Action.CLOSE ->
+                    res = CloseController.close(req);
 
-                default -> res = BadRequestController.invalidRequestMethod(req.getRequestId());
+                default ->
+                    res = BadRequestController.invalidRequestMethod(req.getRequestId());
             }
 
             // Command exists : GET, SET, DEL
             if (cmd != null) {
-                cmdQueue.enqueue(cmd);
+                cmdQueue.offer(cmd);
                 return;
+            }
+
+            if (res == null) {
+                throw new IllegalStateException("Response was not generated for action: " + req.getAction());
             }
 
             // Immediate return for AUTH, CLOSE
@@ -121,9 +131,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            return;
-
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             if (EchoServer.DEBUG_SERVER) {
                 LogUtil.log("Channel read error:", "Error", e);
             }
@@ -149,7 +157,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         // Close the connection when an exception is raised.
-        cause.printStackTrace();
+        LogUtil.log("Unhandled exception in pipeline:", "error", cause);
         ctx.close();
     }
 

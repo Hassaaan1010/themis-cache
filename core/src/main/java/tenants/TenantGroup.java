@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import server.EchoServer;
-import server.controllers.AuthController;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
@@ -17,14 +15,16 @@ import cache.policy.EvictionDecider;
 import cache.policy.ThemisPolicy;
 import common.LogUtil;
 import db.MongoService;
+import server.EchoServer;
+import server.controllers.AuthController;
 
 public class TenantGroup {
 
-    private HashSet<String> authHashesSet = new HashSet<>();
+    private final HashSet<String> authHashesSet = new HashSet<>();
 
-    private HashMap<String, Tenant> tenantsMap = new HashMap<>();
+    private final HashMap<String, Tenant> tenantsMap = new HashMap<>();
 
-    private HashMap<String, Cache> tenantCacheMap = new HashMap<>();
+    private final HashMap<String, Cache> tenantCacheMap = new HashMap<>();
 
     EvictionDecider policy = new ThemisPolicy();
 
@@ -66,5 +66,37 @@ public class TenantGroup {
 
     public Map<String, Cache> getTenantCacheMap() {
         return Collections.unmodifiableMap(tenantCacheMap);
+    }
+
+
+    public void rebalance(Map<String, Integer> frequncyMap) {
+        
+        /*
+        When this function is called, 
+        get starting weights
+        get current weights?
+        get current allocation
+        get frequency map
+        get average allocation for tenant... debt/due
+
+        rank by debt
+
+        let total memory be T
+
+        fair constant share be : r1,r2....
+        current allocation be: a1,a2,....
+        
+
+
+        need final:
+        new weights w'1, w'2...
+        multiply by X and distribute
+
+        
+        
+
+        
+        */
+        throw new UnsupportedOperationException("Unimplemented method 'rebalance'");
     }
 }

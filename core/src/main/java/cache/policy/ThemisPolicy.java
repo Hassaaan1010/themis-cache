@@ -12,4 +12,10 @@ public class ThemisPolicy implements EvictionDecider {
         throw new UnsupportedOperationException("Unimplemented method 'evict'");
     }
 
+    @Override
+    public void Rebalance() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'Rebalance'");
+    }
+
 }

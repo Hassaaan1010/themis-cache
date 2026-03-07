@@ -1,5 +1,7 @@
 package queue.interfaces;
 
+import cache.Cache;
+import common.parsing.protos.ResponseProtos.Response;
 import io.netty.channel.Channel;
 
 public sealed interface CacheCommand permits Put, Get, Evict {
@@ -8,5 +10,5 @@ public sealed interface CacheCommand permits Put, Get, Evict {
     int reqId();
     String tenantId();
 
-    public void execute();
+    public Response execute(Cache tenantCache);
 }
