@@ -1,16 +1,7 @@
 package cache.policy;
 
-import java.util.Map;
+public class ThemisPolicy implements Policy {
 
-import com.google.protobuf.ByteString;
-
-public class ThemisPolicy implements EvictionDecider {
-
-    @Override
-    public String evict(Map<String, ByteString> cache){
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'evict'");
-    }
 
     @Override
     public void Rebalance() {

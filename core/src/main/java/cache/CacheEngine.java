@@ -1,14 +1,13 @@
 package cache;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
+import cache.command.Executable;
 import common.LogUtil;
 import common.parsing.protos.ResponseProtos.Response;
 import queue.CommandQueue;
-import queue.interfaces.CacheCommand;
 import server.EchoServer;
+import tenants.Tenant;
 import tenants.TenantGroup;
 
 public final class CacheEngine {
@@ -16,8 +15,8 @@ public final class CacheEngine {
     private final CommandQueue queue;
     private final TenantGroup tenantGroup;
     private final Map<String, Cache> tenantCachesMap;
-    private final Map<String, Integer> tenantFrequencyMap; // this is reset to 0 every window so doesnt need more bits
-
+    // private final Map<String, Integer> tenantFrequencyMap; // this is reset to 0 every window so doesnt need more bits
+    private final Map<String, Tenant> tenantMap;
     private final Thread worker;
     private volatile boolean running;
 
@@ -25,12 +24,12 @@ public final class CacheEngine {
         this.queue = queue;
         this.tenantGroup = tenantGroup;
         this.tenantCachesMap = tenantGroup.getTenantCacheMap();
+        this.tenantMap = tenantGroup.getTenantsMap();
 
-        this.tenantFrequencyMap = new HashMap<>();
-
-        for (String tenantId : tenantGroup.getAuthHashesSet()) {
-            tenantFrequencyMap.put(tenantId, 0);
-        }
+        // this.tenantFrequencyMap = new HashMap<>();
+        // for (String tenantId : tenantGroup.getAuthHashesSet()) {
+        //     tenantFrequencyMap.put(tenantId, 0);
+        // }
 
         this.worker = new Thread(this::runLoop, "cache-worker");
     }
@@ -49,22 +48,36 @@ public final class CacheEngine {
     private void runLoop() {
         while (running) {
             try {
-                CacheCommand cmd = queue.poll();
+                Executable cmd = queue.poll();
 
-                String tenantId = cmd.tenantId();
+                // String tenantId = cmd.tenantId();
 
-                tenantFrequencyMap.merge(tenantId, 1, Integer::sum);
+                // Increment frequency of requests per tenant. TODO: Remove if unnecessary
+                // tenantFrequencyMap.merge(tenantId, 1, Integer::sum);
 
-                Cache tenantCache = tenantCachesMap.get(cmd.tenantId());
+                Tenant tenant = tenantMap.get(cmd.tenantId());
 
-                Response res = cmd.execute(tenantCache);
+                Response res = cmd.execute(tenant);
 
                 cmd.channel().writeAndFlush(res);
 
-                tenantGroup.rebalance(Collections.unmodifiableMap(tenantFrequencyMap));
+                tenantGroup.rebalance(tenantGroup);
+                
 
-            } catch (InterruptedException e) {
-                LogUtil.log("InterruptedException in Cache Engine:", "Error", e);
+                // if time to evict
+                //      evict( n keys or until n amount of space has been emptied )
+                // if time to rebalance
+                //      rebalance // this is where rebalance HAS to be called. 
+                
+                
+                
+
+                // conditionallyEvict();
+
+                // conditionallyRebalance();
+                
+            } catch (Exception e) {
+                LogUtil.log("Exception in Cache Engine:", "Error", e);
                 Thread.currentThread().interrupt();
                 break;
             }

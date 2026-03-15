@@ -1,14 +1,14 @@
 package server.controllers;
 
+import cache.command.Del;
 import common.parsing.protos.RequestProtos.Request;
 import io.netty.channel.Channel;
-import queue.interfaces.Evict;
 
 public class DelController {
 
-    public static Evict delete( Channel channel, Request req) {
+    public static Del delete( Channel channel, Request req) {
 
-        Evict cmd = new Evict(channel, req.getToken(), req.getRequestId(), req.getKey());
+        Del cmd = new Del(channel, req.getToken(), req.getRequestId(), req.getKey());
         return cmd;
     }
 

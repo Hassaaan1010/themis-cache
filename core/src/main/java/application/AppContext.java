@@ -1,12 +1,13 @@
 package application;
 
 import cache.CacheEngine;
+import cache.MemoryManager;
 import commonCore.EnvConfig;
+import db.MongoService;
 import queue.CommandQueue;
 import server.daemons.BucketDaemon;
 import server.serverUtils.BucketsOwner;
 import tenants.TenantGroup;
-import db.MongoService;
 
 public class AppContext {
 
@@ -14,6 +15,7 @@ public class AppContext {
     private final CommandQueue commandQueue;
     private final TenantGroup tenantGroup;
     private final BucketsOwner bucketsOwner;
+    private final MemoryManager memoryManager;
 
     // ---- Workers ----
     private final BucketDaemon bucketDaemon;
@@ -22,12 +24,13 @@ public class AppContext {
 
     public AppContext() throws Exception {
 
+        
         // ---- Db Init ----
         this.mongoService = new MongoService(
             EnvConfig.DB_URI_STRING,
             EnvConfig.DB_NAME
         );
-
+        
         // ---- Core single-writer state ----
         this.commandQueue = new CommandQueue();
         
@@ -35,8 +38,11 @@ public class AppContext {
         this.bucketsOwner = new BucketsOwner(mongoService);
         this.bucketDaemon = new BucketDaemon(bucketsOwner);
         
-        // ---- Tenant Group
+        // ---- Tenant Group ----
         this.tenantGroup = new TenantGroup(mongoService);
+        
+        // ---- Cache Memory ----
+        this.memoryManager = new MemoryManager();
         
         // ---- Poller thread ----
         this.cacheWorker = new CacheEngine(commandQueue, tenantGroup);
@@ -72,4 +78,9 @@ public class AppContext {
     public BucketsOwner getBucketsOwner() {
         return bucketsOwner;
     }
+
+    public MemoryManager getMemoryManager() {
+        return memoryManager;
+    }
+
 }

@@ -4,9 +4,9 @@ import java.util.HashMap;
 
 import com.google.protobuf.ByteString;
 
+import cache.command.Get;
 import common.parsing.protos.RequestProtos.Request;
 import io.netty.channel.Channel;
-import queue.interfaces.Get;
 
 public class GetController {
 

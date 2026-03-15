@@ -1,10 +1,9 @@
 package server.controllers.helpers;
 
-import common.parsing.protos.ResponseProtos.Response;
-
 import com.google.protobuf.ByteString;
 
 import common.parsing.protos.ResponseProtos;
+import common.parsing.protos.ResponseProtos.Response;
 
 public class ResponseBuilders {
 

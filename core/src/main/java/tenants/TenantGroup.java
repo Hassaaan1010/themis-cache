@@ -11,8 +11,6 @@ import org.bson.Document;
 import com.mongodb.client.FindIterable;
 
 import cache.Cache;
-import cache.policy.EvictionDecider;
-import cache.policy.ThemisPolicy;
 import common.LogUtil;
 import db.MongoService;
 import server.EchoServer;
@@ -25,8 +23,6 @@ public class TenantGroup {
     private final HashMap<String, Tenant> tenantsMap = new HashMap<>();
 
     private final HashMap<String, Cache> tenantCacheMap = new HashMap<>();
-
-    EvictionDecider policy = new ThemisPolicy();
 
     public TenantGroup(MongoService mongoService) {
 
@@ -43,15 +39,12 @@ public class TenantGroup {
                 
             authHashesSet.add(hash);
 
-            // Make cache instance
-            Cache cache = new cache.Cache(policy);
-
-            // Init tenants
-            Tenant tenant = new Tenant(startingWeight, hash, cache);
+            // Init tenant
+            Tenant tenant = new Tenant(startingWeight, hash);
 
             tenantsMap.put(hash, tenant);
 
-            tenantCacheMap.put(hash, cache);
+            tenantCacheMap.put(hash, tenant.getCache());
 
         }
 
@@ -68,8 +61,13 @@ public class TenantGroup {
         return Collections.unmodifiableMap(tenantCacheMap);
     }
 
+    public HashMap<String, Tenant> getTenantsMap() {
+        return tenantsMap;
+    }
 
-    public void rebalance(Map<String, Integer> frequncyMap) {
+     public void rebalance(TenantGroup tenantGroup) {
+
+        // CoreConstants.THRESHOLD_FREQUENCY;
         
         /*
         When this function is called, 

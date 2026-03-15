@@ -1,13 +1,13 @@
 package server.controllers;
 
+import cache.command.Set;
 import common.parsing.protos.RequestProtos.Request;
 import io.netty.channel.Channel;
-import queue.interfaces.Put;
 
 public class SetController {
 
-    public static Put set(Channel channel, Request req) {
-        Put cmd = new Put(
+    public static Set set(Channel channel, Request req) {
+        Set cmd = new Set(
                 channel,
                 req.getToken(),
                 req.getRequestId(),

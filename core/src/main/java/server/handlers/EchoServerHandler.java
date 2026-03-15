@@ -5,6 +5,7 @@ import java.util.HashMap;
 import com.google.protobuf.ByteString;
 
 import application.AppContext;
+import cache.command.Executable;
 import common.LogUtil;
 import common.parsing.protos.RequestProtos.Action;
 import common.parsing.protos.RequestProtos.Request;
@@ -15,7 +16,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import queue.CommandQueue;
-import queue.interfaces.CacheCommand;
 import server.EchoServer;
 import server.controllers.AuthController;
 import server.controllers.BadRequestController;
@@ -62,7 +62,7 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
             }
 
             Response res = null;
-            CacheCommand cmd = null;
+            Executable cmd = null;
 
             // Cast to Request object from deserialized msg
             Request req = (Request) msg;
