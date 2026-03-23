@@ -11,6 +11,8 @@ import org.bson.Document;
 import com.mongodb.client.FindIterable;
 
 import cache.Cache;
+import cache.policy.FairCachePolicy;
+import cache.policy.Policy;
 import common.LogUtil;
 import db.MongoService;
 import server.EchoServer;
@@ -24,7 +26,16 @@ public class TenantGroup {
 
     private final HashMap<String, Cache> tenantCacheMap = new HashMap<>();
 
+    private final Policy policy;
+
+    private int completedRounds;
+
     public TenantGroup(MongoService mongoService) {
+
+        /**
+         * Initilize windows at 0 and then increment on starting rebalancing.
+         */
+        this.completedRounds = 0;
 
         // Load all tenants from db
         FindIterable<Document> allTenants = mongoService.getAllFromUserCollection();
@@ -48,6 +59,9 @@ public class TenantGroup {
 
         }
 
+        // Initialize policy
+        this.policy = new FairCachePolicy(this);
+
         if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Create Tenant Group");
 
     }
@@ -65,36 +79,79 @@ public class TenantGroup {
         return tenantsMap;
     }
 
-     public void rebalance(TenantGroup tenantGroup) {
 
-        // CoreConstants.THRESHOLD_FREQUENCY;
+    public void amortizedEvict() {
+        // Either evict a max number of keys or hit a certain size quota
         
-        /*
-        When this function is called, 
-        get starting weights
-        get current weights?
-        get current allocation
-        get frequency map
-        get average allocation for tenant... debt/due
+    }
 
-        rank by debt
+    public void stopTheWorldEvent() {
 
-        let total memory be T
+        this.policy.redistribute();
 
-        fair constant share be : r1,r2....
-        current allocation be: a1,a2,....
+        resetAllDemandMaps();
+
+        decayAllCounter(); // TODO: Decay while rebalancing.
+
+        // TODO: Adjust rate limits and buckets for tenant allocation.
         
-
-
-        need final:
-        new weights w'1, w'2...
-        multiply by X and distribute
-
-        
-        
-
-        
-        */
         throw new UnsupportedOperationException("Unimplemented method 'rebalance'");
     }
+
+
+    public void resetAllDemandMaps() {
+        for (String tenantHash : tenantCacheMap.keySet()) {
+            tenantCacheMap.get(tenantHash).getDemandTracker().resetDemandMap();
+        }
+    }
+
+    public void decayAllCounter() {
+        for (String tenantHash : tenantCacheMap.keySet()) {
+            tenantCacheMap.get(tenantHash).getFrequencyCounter().decay();
+        }
+    }
+
+    public int incrementRound() {
+        this.completedRounds += 1;
+        return this.completedRounds;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// CoreConstants.THRESHOLD_FREQUENCY;
+
+/*
+When this function is called, 
+get starting weights
+get current weights?
+get current allocation
+get frequency map
+get average allocation for tenant... debt/due
+
+rank by debt
+
+let total memory be T
+
+fair constant share be : r1,r2....
+current allocation be: a1,a2,....
+
+need final:
+new weights w'1, w'2...
+multiply by X and distribute
+
+*/

@@ -8,28 +8,21 @@ public class CountMinSketch implements Counter {
      * ε controls how wrong the counter is allowed to be. Count-Min Sketch
      * always overestimates counts because of hash collisions. ε sets the
      * maximum overestimation relative to the total number of updates.
-     * estimated_count ≤ true_count + ε × total_updates width w = ceil(e / ε) 
-     * ε        width 
-     * 0.1	    ~27
-     * 0.01	    ~272
-     * 0.001	~2718
+     * estimated_count ≤ true_count + ε × total_updates width w = ceil(e / ε) ε
+     * width 0.1	~27 0.01	~272 0.001	~2718
      */
     private final float epsilon_maxWrongness;
 
     /**
      * δ controls how often the guarantee might fail. probability(error > ε ×
-     * total_updates) ≤ δ depth d = ceil(ln(1 / δ)) 
-     * δ	    depth 
-     * 0.1	    3 
-     * 0.01	    5 
-     * 0.001	7
+     * total_updates) ≤ δ depth d = ceil(ln(1 / δ)) δ	depth 0.1	3 0.01	5 0.001	7
      */
     private final float delta_violationChance;
 
     private final int width;
     private final int depth;
     private final short[][] table;
-    
+
     private final int[] seeds;
 
     public CountMinSketch(float epsilon, float delta) {
@@ -76,7 +69,6 @@ public class CountMinSketch implements Counter {
         return min;
     }
 
-
     @Override
     public void increment(String key) {
         // for  ith seed, get hash , w = hash % width, increment short[i][w] by 1
@@ -95,6 +87,8 @@ public class CountMinSketch implements Counter {
 
             short val = tbl[i][idx];
             if (val != Short.MAX_VALUE) {
+                // Short MAX_VALUE = 32767, which for 1 minute windows would need ~530 req/seconds to over flow. Since none of my testing environments reach anywhere close to that I'm not considering that scenario
+                // tbl[i][idx] = (short) Math.min(val + 1, Short.MAX_VALUE);
                 tbl[i][idx] = (short) (val + 1);
             }
         }

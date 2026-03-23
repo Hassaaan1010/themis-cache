@@ -17,7 +17,7 @@ public class BucketsOwner {
     final private int MAX_BUCKET_CAP = 1000;
     final private int BUCKET_INCREMENT = 100;
 
-    private HashMap<String, AtomicInteger> tokenBuckets = new HashMap<>();
+    private final HashMap<String, AtomicInteger> tokenBuckets = new HashMap<>();
 
     // private BiFunction<String, String, String> getHash = (id, password) ->
     // String.valueOf((id + password).hashCode());
@@ -87,4 +87,8 @@ public class BucketsOwner {
         // throw new UnsupportedOperationException("Unimplemented method 'printBucket'");
     }
 
+
+    public void adjustBucketsByShare(HashMap<String, Integer> tenantShares ) {
+        // TODO: implement
+    }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import cache.command.Executable;
 import common.LogUtil;
 import common.parsing.protos.ResponseProtos.Response;
+import commonCore.CoreConstants;
 import queue.CommandQueue;
 import server.EchoServer;
 import tenants.Tenant;
@@ -31,7 +32,7 @@ public final class CacheEngine {
         //     tenantFrequencyMap.put(tenantId, 0);
         // }
 
-        this.worker = new Thread(this::runLoop, "cache-worker");
+        this.worker = new Thread(this::runEnginePoller, "cache-worker");
     }
 
     public void start() {
@@ -45,14 +46,16 @@ public final class CacheEngine {
         }
     }
 
-    private void runLoop() {
+    private void runEnginePoller() {
+
+        long lastRebalance = System.currentTimeMillis();
+        long lastAmortization = System.currentTimeMillis();
+
         while (running) {
             try {
                 Executable cmd = queue.poll();
 
                 // String tenantId = cmd.tenantId();
-
-                // Increment frequency of requests per tenant. TODO: Remove if unnecessary
                 // tenantFrequencyMap.merge(tenantId, 1, Integer::sum);
 
                 Tenant tenant = tenantMap.get(cmd.tenantId());
@@ -61,20 +64,27 @@ public final class CacheEngine {
 
                 cmd.channel().writeAndFlush(res);
 
-                tenantGroup.rebalance(tenantGroup);
-                
 
-                // if time to evict
-                //      evict( n keys or until n amount of space has been emptied )
-                // if time to rebalance
-                //      rebalance // this is where rebalance HAS to be called. 
-                
-                
-                
 
-                // conditionallyEvict();
+                // ----- SCHEDULED WORK ----- 
+                /**
+                 * Scheduled work can be held awaiting indefinitely if the queue is empty. 
+                 * This is a necessary trade off to prevent spin wait on the queue and since there is no eviction or rebalancing pressure if no one is active, this has effectively no downside.
+                 */
+                
+                long now = System.currentTimeMillis();
 
-                // conditionallyRebalance();
+                // amortized eviction (small continuous work)
+                if (now - lastAmortization >= CoreConstants.AMORTIZATION_WINDOW) {
+                    tenantGroup.amortizedEvict();   // evict small amount
+                    lastAmortization = now;
+                }
+
+                // periodic stop-the-world rebalance
+                if (now - lastRebalance >= CoreConstants.REBALANCING_WINDOW) {
+                    tenantGroup.stopTheWorldEvent();
+                    lastRebalance = now;
+                }
                 
             } catch (Exception e) {
                 LogUtil.log("Exception in Cache Engine:", "Error", e);
@@ -82,7 +92,6 @@ public final class CacheEngine {
                 break;
             }
 
-            // Amortized Eviction?
         }
     }
 

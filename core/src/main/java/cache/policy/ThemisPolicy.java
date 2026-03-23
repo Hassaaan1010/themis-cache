@@ -4,7 +4,7 @@ public class ThemisPolicy implements Policy {
 
 
     @Override
-    public void Rebalance() {
+    public void redistribute() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'Rebalance'");
     }

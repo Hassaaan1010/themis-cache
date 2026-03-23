@@ -3,6 +3,7 @@ package cache;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.protobuf.ByteString;
@@ -43,8 +44,16 @@ public class Cache {
      */
     private boolean tryMakingSpace(String candidateKey, int spaceNeeded) throws Exception {
 
+        /**
+         * If key was in Cache, then it will not have freq in demand tracker, and cached keys will have cms frequency.
+        */
         // Get candidateKey's count
-        short candidateKeyFrequency = this.frequencyCounter.getCount(candidateKey);
+        Short candidateKeyFrequency;
+
+        candidateKeyFrequency = demandTracker.getFrequency(candidateKey);
+        if (candidateKeyFrequency == null) {
+            candidateKeyFrequency = this.frequencyCounter.getCount(candidateKey);
+        }
 
         for (int attempt_i = 0; attempt_i < maxBoundedEvictions; attempt_i++) {
 
@@ -113,9 +122,6 @@ public class Cache {
                 // Replace value
                 existingEntry.setValue(newValue);
 
-                // Increment frequencyCount
-                frequencyCounter.increment(key);
-
             } else {
 
                 // Invert subtraction
@@ -129,9 +135,6 @@ public class Cache {
                     // Replace value
                     existingEntry.setValue(newValue);
 
-                    // Increment frequencyCount
-                    frequencyCounter.increment(key);
-
                 } else {
                     // Try bounded eviction
                     boolean evictionSuccess = tryMakingSpace(key, sizeDiff);
@@ -142,9 +145,6 @@ public class Cache {
 
                         // Replace value
                         existingEntry.setValue(newValue);
-
-                        // Increment frequencyCount
-                        frequencyCounter.increment(key);
 
                     } else {
                         // Mark fail
@@ -173,9 +173,6 @@ public class Cache {
                 // Cache entry
                 this.cache.put(key, newEntry);
 
-                // Increment frequencyCount
-                frequencyCounter.increment(key);
-
             } 
             // If available not enough
             else {
@@ -194,9 +191,6 @@ public class Cache {
                     // Cache entry
                     this.cache.put(key, newEntry);
 
-                    // Increment frequencyCount
-                    frequencyCounter.increment(key);
-
                 } else {
                     // Mark fail
                     demandTracker.setFail(key, newValue);
@@ -206,8 +200,41 @@ public class Cache {
             }
         }
 
+        if (success) {
+            // Incase this was being tracked as demand
+            demandTracker.stopTracking(key);
+
+            // Always increment on success
+            frequencyCounter.increment(key);
+        }
+
         return success;
     }
+
+    // @Deprecated
+    // private void successfulSet(String key, ByteString val, Entry existingEntry, int sizeDiff) throws Exception {
+    //     if (existingEntry  == null) {
+    //         // Use available
+    //         tenant.useAvailable(val.size());
+
+    //         Entry newEntry = new Entry(key, val);
+
+    //         // Add to entries
+    //         entries.add(newEntry);
+
+    //         // Cache entry
+    //         this.cache.put(key, newEntry);
+
+    //     } else {
+    //          // Add diff to quota
+    //         tenant.useAvailable(sizeDiff);
+
+    //         // Replace value
+    //         existingEntry.setValue(val);
+
+    //     }
+    // }
+    
 
     public ByteString get(String key) {
         ByteString val = cache.get(key).value();
@@ -239,9 +266,29 @@ public class Cache {
 
         // Set replacement in place of candidate's index
         entries.set(removedEnt.index, lastEnt);
+
+        // Remove from demand tracking
+        this.demandTracker.stopTracking(key);
     }
 
-    public int size() {
+    public int cacheSize() {
         return cache.size();
     }
+
+    public int getKeySize(String key) {
+        return this.cache.get(key).size();
+    }
+
+    public Set<String> getKeySet() {
+        return this.cache.keySet();
+    }
+
+    public DemandTracker getDemandTracker() {
+        return demandTracker;
+    }
+
+    public Counter getFrequencyCounter() {
+        return frequencyCounter;
+    }
+
 }
