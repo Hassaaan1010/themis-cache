@@ -13,6 +13,9 @@ public class DemandTracker {
      * This map use to calculate demand of each tenant at end of window Reset to
      * new map after rebalancing
      *
+     * Can not be a CMS like freq tracker because each key has to have an associated
+     * demanded size too.
+     * Bloat of zeroed keys is prevented by removing them in rebalancing.
      * <T> can not be Short because size of 32767 is not out cap.
      */
     private Map<String, ArrayList<Integer>> demandMap;
@@ -25,7 +28,7 @@ public class DemandTracker {
         ArrayList<Integer> metrics = demandMap.get(key);
 
         if (metrics == null) {
-            // Initialize metrics as [1, 0]
+            // Initialize metrics as [1, 0] i.e. [frequency, size]
             /**
              * Frequency set to 1 and size to 0. If tenant actually needs it,
              * they will try to set value. Without value, area can not be
@@ -55,7 +58,9 @@ public class DemandTracker {
 
         } else {
             metrics.set(0, metrics.get(0) + 1);
-            metrics.set(1, Math.max(metrics.get(1), value.size())); // Max size for accomodating largest demand possible. This can not be exploited due to fairness guarantee
+            metrics.set(1, Math.max(metrics.get(1), value.size())); // Max size for accomodating largest demand
+                                                                    // possible. This can not be exploited due to
+                                                                    // fairness guarantee
         }
 
     }
@@ -89,6 +94,13 @@ public class DemandTracker {
 
     public void resetDemandMap() {
         this.demandMap = new HashMap<>();
+    }
+
+    public void decayKey(String key) {
+        demandMap.compute(key, (k, metrics) -> {
+            metrics.set(0, metrics.get(0) / 2);
+            return metrics;
+        });
     }
 
 }

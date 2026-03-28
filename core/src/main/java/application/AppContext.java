@@ -40,6 +40,7 @@ public class AppContext {
         
         // ---- Tenant Group ----
         this.tenantGroup = new TenantGroup(mongoService);
+        this.bucketsOwner.setTenantMap(this.tenantGroup.getTenantsMap());
         
         // ---- Cache Memory ----
         this.memoryManager = new MemoryManager();

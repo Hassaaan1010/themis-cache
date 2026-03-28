@@ -11,14 +11,15 @@ public class Tenant {
     private final Cache cache;
 
     private final double fairShareWeight; 
+    private double currentWeight;
     
-    private final int fairShareAllocation;
-    private int currentTotalAllocation;
+    private final long fairShareAllocation;
+    private long currentTotalAllocation;
     
-    private int summationAllocation;
-    private int summationFairShare;
+    private long summationAllocation;
+    private long summationFairShare;
     
-    private int available;
+    private long available;
 
     
     private final DemandTracker demandTracker;
@@ -31,7 +32,7 @@ public class Tenant {
         this.hashToken = hashToken;
         this.fairShareWeight = weight;
 
-        this.fairShareAllocation = (int) Math.floor(weight * CoreConstants.TOTAL_CACHE_SIZE );
+        this.fairShareAllocation = (long) Math.floor(weight * CoreConstants.TOTAL_CACHE_SIZE );
         this.currentTotalAllocation = this.fairShareAllocation;
         this.available = this.currentTotalAllocation;
         
@@ -50,20 +51,24 @@ public class Tenant {
     public double getFairShareWeight() {
         return fairShareWeight;
     }
+
+    public double getCurrentWeight() {
+        return currentWeight;
+    }
     
-    public int getCurrentTotalAllocation() {
+    public long getCurrentTotalAllocation() {
         return currentTotalAllocation;
     }
 
-    public int getFairShareAllocation() {
+    public long getFairShareAllocation() {
         return fairShareAllocation;
     }
 
-    public int getAvailable() {
+    public long getAvailable() {
         return available;
     }
 
-    public int getDebt() {
+    public long getDebt() {
         return this.summationAllocation - this.summationFairShare;
     }
 
@@ -71,15 +76,15 @@ public class Tenant {
         return this.summationAllocation / this.summationFairShare;
     }
 
-    public void useAvailable(int newUse) throws Exception {
+    public void useAvailable(long newUse) throws Exception {
         if (getAvailable() - newUse < 0) {
             throw new Exception("Can not use more than allocated quota.");
         }
         this.available = this.available - newUse;
     }
 
-    public void returnAvailable(int returnUsed) throws  Exception {
-        if (getAvailable() + returnUsed > getCurrentTotalAllocation()) {
+    public void returnAvailable(long returnUsed) throws  Exception {
+        if (this.getAvailable() + returnUsed > this.getCurrentTotalAllocation()) {
             throw  new Exception("Can not return more than what was taken.");
         }
         this.available = this.available + returnUsed;
@@ -93,28 +98,44 @@ public class Tenant {
         return cache;
     }
     
+    public void setCurrentWeight(double currentWeight) {
+        this.currentWeight = currentWeight;
+    }
+    
     public DemandTracker getDemandTracker() {
         return demandTracker;
     }
     
     // ---- SETTERS ----    
-    public void setCurrentTotalAllocation(int newCurrentAllocation) {
+    public void setCurrentTotalAllocation(long newCurrentAllocation) {
         this.currentTotalAllocation = newCurrentAllocation;
     }
     
-    public void updateCompletedRoundMetrics(int completedRounds) {
+    public void updateCompletedRoundMetrics(long completedRounds) {
         this.summationAllocation += this.currentTotalAllocation;
         this.summationFairShare += this.fairShareAllocation;  
     }
    
-    public int prempt(int demandedAmmount) {
-        int unpremptable = (int) Math.floor(CoreConstants.UNPREMPTABLE_PERCENTAGE * this.getFairShareAllocation());
-        int curAllocation = getCurrentTotalAllocation();
+
+    /**
+     * Will not prempt more than debt.
+     * @param demandedAmmount
+     * @return
+     */
+    public long premptFromDebt(long demandedAmmount) {
+
+        // Can not prempt more than what is owed.
+        demandedAmmount = Math.min( demandedAmmount, this.getDebt());
+        
+        // Leave some space for critical keys.
+        long unpremptable = (long) Math.floor(CoreConstants.UNPREMPTABLE_PERCENTAGE * this.getFairShareAllocation());
+        long curAllocation = this.getCurrentTotalAllocation();
+        
         if (unpremptable >= curAllocation) {
             return 0;
         }
         else {
-            int premptable = curAllocation - unpremptable;
+            long premptable = curAllocation - unpremptable;
             return Math.min(premptable, demandedAmmount);
         }
     }

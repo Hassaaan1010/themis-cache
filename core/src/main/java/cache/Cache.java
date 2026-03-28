@@ -42,7 +42,7 @@ public class Cache {
     /**
      * Try bounded random sample eviction for key based on frequency.
      */
-    private boolean tryMakingSpace(String candidateKey, int spaceNeeded) throws Exception {
+    private boolean tryMakingSpace(String candidateKey, long spaceNeeded) throws Exception {
 
         /**
          * If key was in Cache, then it will not have freq in demand tracker, and cached keys will have cms frequency.
@@ -106,13 +106,13 @@ public class Cache {
 
         // If already exists, update.
         Entry existingEntry = this.cache.get(key);
-        int available = tenant.getAvailable(); 
+        long available = tenant.getAvailable(); 
         boolean success = true;       
 
         // If already exists
         if (existingEntry != null) {
 
-            int sizeDiff = existingEntry.value().size() - newValue.size();
+            long sizeDiff = existingEntry.value().size() - newValue.size();
 
             // New value is smaller or equal
             if (sizeDiff >= 0) {

@@ -89,26 +89,9 @@ public class TenantGroup {
 
         this.policy.redistribute();
 
-        resetAllDemandMaps();
-
-        decayAllCounter(); // TODO: Decay while rebalancing.
-
         // TODO: Adjust rate limits and buckets for tenant allocation.
         
         throw new UnsupportedOperationException("Unimplemented method 'rebalance'");
-    }
-
-
-    public void resetAllDemandMaps() {
-        for (String tenantHash : tenantCacheMap.keySet()) {
-            tenantCacheMap.get(tenantHash).getDemandTracker().resetDemandMap();
-        }
-    }
-
-    public void decayAllCounter() {
-        for (String tenantHash : tenantCacheMap.keySet()) {
-            tenantCacheMap.get(tenantHash).getFrequencyCounter().decay();
-        }
     }
 
     public int incrementRound() {

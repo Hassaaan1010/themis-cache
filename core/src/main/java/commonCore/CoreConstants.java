@@ -33,7 +33,7 @@ public class CoreConstants {
     **/
     public static final short THRESHOLD_FREQUENCY = 100; 
     
-    public static final double UNPREMPTABLE_PERCENTAGE 0.2;
+    public static final double UNPREMPTABLE_PERCENTAGE = 0.2;
     
 }
 
