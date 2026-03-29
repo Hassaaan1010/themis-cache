@@ -23,6 +23,6 @@ public class LogUtil {
             sb.append(value != null ? value.toString() : "null").append("\n");
         }
 
-        System.out.println(sb.toString());
+        System.out.println("[LOG]" + sb.toString());
     }
 }

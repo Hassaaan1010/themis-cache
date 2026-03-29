@@ -65,6 +65,8 @@ public class BucketsOwner {
             int incrementAmount = Math.min((int) (weight * TOTAL_BUCKET_INCREMENT), cap);
             if (tokenBuckets.get(tenantHashBucket).intValue() + incrementAmount < cap) {
                 tokenBuckets.get(tenantHashBucket).getAndAdd(incrementAmount);
+            } else {
+                tokenBuckets.get(tenantHashBucket).getAndSet(cap);
             }
         }
         long end = System.nanoTime();

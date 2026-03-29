@@ -5,6 +5,8 @@ import commonSDK.EnvConfig;
 
 import com.google.protobuf.ByteString;
 
+import client.EchoClient;
+import common.LogUtil;
 import common.parsing.protos.RequestProtos.Action;
 import common.parsing.protos.RequestProtos.Request;
 
@@ -25,6 +27,8 @@ public class RequestUtils {
 
         String tenantId = EnvConfig.TENANT_ID;
         String password = EnvConfig.PASSWORD;
+
+        if (EchoClient.DEBUG_CLIENT) LogUtil.log("Envs: ","Id", tenantId, "password", password);
 
         Request req = Request.newBuilder()
                 .setAction(Action.AUTH) // 1 + 1 feild prefix

@@ -222,7 +222,7 @@ public class EchoClient {
         } catch (Exception e) {
             if (DEBUG_CLIENT)
                 LogUtil.log("Error in " + operation + " request.", "Error", e);
-
+            e.printStackTrace();
             return RequestUtils.makeUpErrorResponse(500,
                     "Failed to " + operation.toLowerCase() + ".",
                     requestId);
