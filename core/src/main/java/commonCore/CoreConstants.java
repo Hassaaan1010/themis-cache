@@ -39,5 +39,10 @@ public class CoreConstants {
     // Max number of evictions in a 
     public static final int MAX_TOTAL_AMORTIZED_ROUND_EVICT = 2000;
     
+    
+    public static final int BUCKET_REFILL_INTERVAL = 500;
+    public static final int TOTAL_BUCKETS_CAP = 1000;
+    public static final int TOTAL_BUCKET_INCREMENT = 100;
+ 
 }
 

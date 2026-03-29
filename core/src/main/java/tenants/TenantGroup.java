@@ -101,8 +101,8 @@ public class TenantGroup {
             ArrayList<String> coldList = evictablesMap.get(tenantHash);
             Cache tenantCache = this.tenantCacheMap.get(tenantHash);
 
-            while (maxEvictions > 0 || !coldList.isEmpty()) {
-                String victim = coldList.remove(-1);
+            while (maxEvictions > 0 && !coldList.isEmpty()) {
+                String victim = coldList.remove(0);
                 try {
                     tenantCache.remove(victim);
                 } catch (Exception e) {

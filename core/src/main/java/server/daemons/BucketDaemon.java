@@ -1,56 +1,45 @@
 package server.daemons;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import common.LogUtil;
+import commonCore.CoreConstants;
 import server.EchoServer;
-import server.serverUtils.BucketsOwner;
+import server.rateLimiting.BucketsOwner;
 
-public class BucketDaemon implements Runnable {
+public class BucketDaemon {
 
-    final private int SLEEP_INTERVAL = 500;
+    final private int sleepInterval = CoreConstants.BUCKET_REFILL_INTERVAL;
     final private BucketsOwner bucketsOwner;
-    final private Thread tapThread;
-
-    private volatile boolean running;
+    final private ScheduledExecutorService scheduler;
+    // private volatile boolean running;
 
     public BucketDaemon(BucketsOwner buckets) {
         this.bucketsOwner = buckets;
-        this.tapThread = new Thread(this, "TapThread");
-        this.tapThread.setDaemon(true);
-    }
-
-
-    @Override
-    public void run() {
-
-        while (running) {
-            try {
-                this.bucketsOwner.incrementBuckets();
-                Thread.sleep(SLEEP_INTERVAL);
-            } catch (InterruptedException e) {
-                // Interruption is the only sane shutdown signal
-                running = false;
-                Thread.currentThread().interrupt();
-            } catch (Throwable t) {
-                if (EchoServer.DEBUG_SERVER) {
-                    LogUtil.log("Bucket Daemon crashed", "ERROR", t.getStackTrace());
-                }
-            }
-        }
-
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void start() {
-        this.running = true;
-        this.tapThread.start();
-        
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Started Bucket Daemon");
+
+        this.scheduler.scheduleWithFixedDelay(() -> {
+            try {
+                this.bucketsOwner.incrementBuckets();
+            } catch (Exception e) {
+                e.printStackTrace(); 
+            }
+        }, 0, sleepInterval, TimeUnit.MILLISECONDS);
+
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("✅ Started Bucket Daemon");
     }
 
     public void shutdown() {
-        this.running = false;
-        this.tapThread.interrupt();
+        scheduler.shutdownNow();
 
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Shutdown Bucket Daemon");
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("✅ Shutdown Bucket Daemon");
 
     }
 }

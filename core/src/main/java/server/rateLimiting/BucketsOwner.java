@@ -1,4 +1,4 @@
-package server.serverUtils;
+package server.rateLimiting;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,10 @@ public class BucketsOwner {
                     tenant.getObjectId("_id").toString(),
                     tenant.getString("password"));
 
-            tokenBuckets.put(hash, new AtomicInteger(0));
+            this.tenantWeights = new HashMap<>();
+
+            Double weight = tenant.getDouble("weight");
+            tokenBuckets.put(hash, new AtomicInteger((int) Math.floor(TOTAL_BUCKETS_CAP * weight)));
         }
         if (EchoServer.DEBUG_SERVER)
             LogUtil.log("✅ Create Bucket Owner", "buckets", tokenBuckets.toString());
@@ -47,6 +50,10 @@ public class BucketsOwner {
 
     public void incrementBuckets() {
 
+        long start = System.nanoTime();
+
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("Starting Bucket Increment");
         // Update portions in map
         updateWeights();
 
@@ -54,11 +61,16 @@ public class BucketsOwner {
 
             // If less than capacity
             double weight = tenantWeights.get(tenantHashBucket);
-            if (tokenBuckets.get(tenantHashBucket).intValue() + (TOTAL_BUCKET_INCREMENT * weight) < TOTAL_BUCKETS_CAP
-                    * weight) {
-                tokenBuckets.get(tenantHashBucket).getAndAdd((int) Math.floor(TOTAL_BUCKET_INCREMENT * weight));
+            int cap = (int) (TOTAL_BUCKETS_CAP * weight);
+            int incrementAmount = Math.min((int) (weight * TOTAL_BUCKET_INCREMENT), cap);
+            if (tokenBuckets.get(tenantHashBucket).intValue() + incrementAmount < cap) {
+                tokenBuckets.get(tenantHashBucket).getAndAdd(incrementAmount);
             }
         }
+        long end = System.nanoTime();
+
+        if (EchoServer.DEBUG_SERVER)
+        LogUtil.log("Ended Bucket Increment", "took_ns", end - start, "buckets", tokenBuckets );
     }
 
     private void updateWeights() {
@@ -79,7 +91,8 @@ public class BucketsOwner {
         AtomicInteger bucket = tokenBuckets.get(token);
 
         // check if tokens not left, return false
-        while (true) {
+        // while (true) {
+        synchronized (bucket) {
             int curr = bucket.get();
 
             if (curr <= 0)
@@ -87,7 +100,10 @@ public class BucketsOwner {
 
             if (bucket.compareAndSet(curr, curr - 1)) {
                 return true;
+            } else {
+                return false;
             }
         }
+        // }
     }
 }

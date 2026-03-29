@@ -9,6 +9,7 @@ import java.util.Set;
 import cache.Cache;
 import cache.demand.DemandTracker;
 import cache.frequency.Counter;
+import cache.utils.Tracer;
 import commonCore.CoreConstants;
 import tenants.Tenant;
 import tenants.TenantGroup;
@@ -56,6 +57,7 @@ public class FairCachePolicy implements Policy {
             tenantEvictablesMap.get(tenantHash).clear();
         }
 
+        Tracer.start("Find Cold/Demand");
         // For each tenant:
         // Aprox 20-30ms for 20 tenants, 20k keys per tenant. Through 4 hashes.
         for (String tenantHash : this.tenantMap.keySet()) {
@@ -80,6 +82,8 @@ public class FairCachePolicy implements Policy {
             Set<String> tenantCacheKeys = this.tenantCacheMap.get(tenantHash).getKeySet();
 
             
+            Tracer.start("Find Cold for tenant" + tenantHash);
+            
             // Find Cold Region in cache. Loop over cached keys.
             for (String key : tenantCacheKeys) {
 
@@ -94,12 +98,15 @@ public class FairCachePolicy implements Policy {
             }
 
             // Decay tenant's frequency counter. (All keys at once)
+            Tracer.start("Freq Decay");
             frequencyCounter.decay();
+            Tracer.end();
 
             // Get Demand Tracker of tenant's cache
             DemandTracker demandTracker = tenantCache.getDemandTracker();
             Map<String, ArrayList<Integer>> demandMap = demandTracker.getDemandMap();
 
+            Tracer.start("Find Demand for tenant" + tenantHash);
             // Find Demand of tenant. Loop over demanded keys
             for (String key : demandMap.keySet()) {
 
@@ -119,6 +126,7 @@ public class FairCachePolicy implements Policy {
                 demandTracker.decayKey(key);
                 
             }
+            Tracer.end();
 
             long netRequirement = tenantDemandedSize.get(tenantHash) - tenantColdRegion.get(tenantHash);
 
@@ -143,6 +151,11 @@ public class FairCachePolicy implements Policy {
                 distributable += netRequirement;
             }
         }
+        Tracer.end();
+
+        // --------- DISTRIBUTION LOGIC ----------
+        Tracer.start("Redistribution Event");
+
 
         // TODO: removing from distribution should always be a method call that performs
         // a transaction that maintains consistency in metrics.
@@ -240,6 +253,8 @@ public class FairCachePolicy implements Policy {
             double weight = CoreConstants.TOTAL_CACHE_SIZE / tenant.getCurrentTotalAllocation();
             tenant.setCurrentWeight(weight);
         } 
+
+        Tracer.end();
 
     }
 

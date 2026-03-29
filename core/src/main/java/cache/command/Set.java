@@ -3,10 +3,9 @@ package cache.command;
 import com.google.protobuf.ByteString;
 
 import cache.Cache;
-import common.LogUtil;
+import cache.utils.Tracer;
 import common.parsing.protos.ResponseProtos.Response;
 import io.netty.channel.Channel;
-import server.EchoServer;
 import server.controllers.helpers.ResponseBuilders;
 import tenants.Tenant;
 
@@ -20,6 +19,8 @@ public final record Set(
     @Override
     public Response execute(Tenant tenant) throws Exception {
 
+        Tracer.start("SET " + key);
+
         Cache tenantCache = tenant.getCache();
         boolean success;
         Response res;
@@ -32,8 +33,8 @@ public final record Set(
             res = ResponseBuilders.makeSetResponse(507, key, reqId);
         }
 
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Set Opperation: ", "Key", key);
-        
+        Tracer.end();
+
         return res;
     }
 }

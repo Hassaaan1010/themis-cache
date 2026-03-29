@@ -1,16 +1,14 @@
 package server.handlers;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import server.EchoServer;
-// import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
-import server.serverUtils.EchoException;
-
 import java.util.List;
 
 import common.CommonConstants;
 import common.LogUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import server.EchoServer;
+import server.serverUtils.EchoException;
 
 public class SafeReqFrameDecoder extends ByteToMessageDecoder {
     private final int maxFrameSize;
@@ -23,7 +21,7 @@ public class SafeReqFrameDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("Did we reach the frame length prepend safe decoder?");
+        // if (EchoServer.DEBUG_SERVER) LogUtil.log("Did we reach the frame length prepend safe decoder?");
         
         // Mark reader index so we can reset if needed
         in.markReaderIndex();

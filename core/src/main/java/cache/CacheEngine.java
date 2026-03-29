@@ -3,6 +3,7 @@ package cache;
 import java.util.Map;
 
 import cache.command.Executable;
+import cache.utils.Tracer;
 import common.LogUtil;
 import common.parsing.protos.ResponseProtos.Response;
 import commonCore.CoreConstants;
@@ -16,7 +17,8 @@ public final class CacheEngine {
     private final CommandQueue queue;
     private final TenantGroup tenantGroup;
     private final Map<String, Cache> tenantCachesMap;
-    // private final Map<String, Integer> tenantFrequencyMap; // this is reset to 0 every window so doesnt need more bits
+    // private final Map<String, Integer> tenantFrequencyMap; // this is reset to 0
+    // every window so doesnt need more bits
     private final Map<String, Tenant> tenantMap;
     private final Thread worker;
     private volatile boolean running;
@@ -29,7 +31,7 @@ public final class CacheEngine {
 
         // this.tenantFrequencyMap = new HashMap<>();
         // for (String tenantId : tenantGroup.getAuthHashesSet()) {
-        //     tenantFrequencyMap.put(tenantId, 0);
+        // tenantFrequencyMap.put(tenantId, 0);
         // }
 
         this.worker = new Thread(this::runEnginePoller, "cache-worker");
@@ -55,8 +57,7 @@ public final class CacheEngine {
             try {
                 Executable cmd = queue.poll();
 
-                // String tenantId = cmd.tenantId();
-                // tenantFrequencyMap.merge(tenantId, 1, Integer::sum);
+                Tracer.start("Command Execute " + cmd.reqId());
 
                 Tenant tenant = tenantMap.get(cmd.tenantId());
 
@@ -64,30 +65,37 @@ public final class CacheEngine {
 
                 cmd.channel().writeAndFlush(res);
 
+                Tracer.end();
 
-
-                // ----- SCHEDULED WORK ----- 
+                // ----- SCHEDULED WORK -----
                 /**
-                 * Scheduled work can be held awaiting indefinitely if the queue is empty. 
-                 * This is a necessary trade off to prevent spin wait on the queue and since there is no eviction or rebalancing pressure if no one is active, this has effectively no downside.
+                 * Scheduled work can be held awaiting indefinitely if the queue is empty.
+                 * This is a necessary trade off to prevent spin wait on the queue and since
+                 * there is no eviction or rebalancing pressure if no one is active, this has
+                 * effectively no downside.
                  */
-                
+
                 long now = System.currentTimeMillis();
 
                 // amortized eviction (small continuous work)
                 if (now - lastAmortization >= CoreConstants.AMORTIZATION_WINDOW) {
-                    tenantGroup.amortizedEvict(tenantGroup.getPolicy().getTenantEvictablesMap());   // evict small amount
+                    Tracer.start("Amortized Eviction");
+                    tenantGroup.amortizedEvict(tenantGroup.getPolicy().getTenantEvictablesMap()); // evict small amount
+                    Tracer.end();
                     lastAmortization = now;
                 }
 
                 // periodic stop-the-world rebalance
                 if (now - lastRebalance >= CoreConstants.REBALANCING_WINDOW) {
+                    Tracer.start("Stop the world");
                     tenantGroup.stopTheWorldEvent();
+                    Tracer.end();
                     lastRebalance = now;
                 }
-                
+
             } catch (Exception e) {
-                LogUtil.log("Exception in Cache Engine:", "Error", e);
+                LogUtil.log("Exception in Cache Engine:", "Message", e.getMessage(), "Error", e.getStackTrace());
+                e.printStackTrace();
                 Thread.currentThread().interrupt();
                 break;
             }

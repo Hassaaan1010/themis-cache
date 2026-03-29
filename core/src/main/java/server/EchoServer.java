@@ -19,7 +19,7 @@ import server.handlers.EchoServerHandler;
 import server.handlers.SafeReqFrameDecoder;
 import server.handlers.TenantRateLimitHandler;
 import server.parsing.ProtobufServerCodec;
-import server.serverUtils.BucketsOwner;
+import server.rateLimiting.BucketsOwner;
 
 
 public class EchoServer{

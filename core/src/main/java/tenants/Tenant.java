@@ -30,6 +30,7 @@ public class Tenant {
         // this.currentWeight = weight;
         this.hashToken = hashToken;
         this.fairShareWeight = weight;
+        this.currentWeight = weight;
 
         this.fairShareAllocation = (long) Math.floor(weight * CoreConstants.TOTAL_CACHE_SIZE);
         this.currentTotalAllocation = this.fairShareAllocation;

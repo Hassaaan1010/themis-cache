@@ -1,8 +1,6 @@
 package cache.frequency;
 
 public class Hasher {
-    
-
 
     public static int murmurHash32(int data, int seed) {
         int h = seed;

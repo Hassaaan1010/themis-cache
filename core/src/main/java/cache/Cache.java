@@ -237,7 +237,13 @@ public class Cache {
     
 
     public ByteString get(String key) {
-        ByteString val = cache.get(key).value();
+        Entry entry = cache.get(key);
+        
+        if (entry == null) {
+            return null;
+        }
+
+        ByteString val = entry.value();
 
         if (val == null) {
             demandTracker.getFail(key);

@@ -6,7 +6,7 @@ import commonCore.EnvConfig;
 import db.MongoService;
 import queue.CommandQueue;
 import server.daemons.BucketDaemon;
-import server.serverUtils.BucketsOwner;
+import server.rateLimiting.BucketsOwner;
 import tenants.TenantGroup;
 
 public class AppContext {

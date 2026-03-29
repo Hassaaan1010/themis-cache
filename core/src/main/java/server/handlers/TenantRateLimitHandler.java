@@ -11,7 +11,7 @@ import io.netty.util.ReferenceCountUtil;
 import server.EchoServer;
 import server.controllers.AuthController;
 import server.controllers.helpers.ResponseBuilders;
-import server.serverUtils.BucketsOwner;
+import server.rateLimiting.BucketsOwner;
 
 public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
 
@@ -37,7 +37,7 @@ public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
                 ReferenceCountUtil.release(msg); // drop msg from buffer
 
             } else {
-               
+
                 // Cast to Request object from deserialized msg
                 Request req = (Request) msg;
                 String tenantToken;
@@ -49,14 +49,23 @@ public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
                     tenantToken = req.getToken();
                 }
 
+                if (EchoServer.DEBUG_SERVER)
+                    LogUtil.log("------------- Rate Limit check: ", "Tenants' bucket",
+                            this.tokenBuckets.getBucketOfTenant(tenantToken));
+
                 // Rate limit check
-                if (!this.tokenBuckets.tryBucketDecrement(tenantToken)){
+                if (!this.tokenBuckets.tryBucketDecrement(tenantToken)) {
+
+                    if (EchoServer.DEBUG_SERVER)
+                        LogUtil.log("------------- Rate Limit REASON:  ", "Tenants' BUCKET",
+                                this.tokenBuckets.getBucketOfTenant(tenantToken));
+
                     Response res = ResponseBuilders.makeRateLimitResponse(req.getRequestId());
                     ctx.writeAndFlush(res);
 
-                    if (EchoServer.DEBUG_SERVER) LogUtil.log("Hit rate limit. Slow down");
-                    return;
-                    
+                    if (EchoServer.DEBUG_SERVER)
+                        LogUtil.log("Hit rate limit. Slow down");
+
                 } else {
                     // continues to next handler
                     ctx.fireChannelRead(msg);
@@ -64,8 +73,8 @@ public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
             }
 
         } catch (Exception e) {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Rate limiter: ", "Error", e);
-            e.printStackTrace();
+            if (EchoServer.DEBUG_SERVER)
+                LogUtil.log("Error in Rate limiter: ", "Error", e, "Message", e.getMessage());
         }
     }
 }
