@@ -34,6 +34,10 @@ public class CoreConstants {
     public static final short THRESHOLD_FREQUENCY = 100; 
     
     public static final double UNPREMPTABLE_PERCENTAGE = 0.2;
+    public static final double FAIRNESS_PRIORITY = 0.5;
+
+    // Max number of evictions in a 
+    public static final int MAX_TOTAL_AMORTIZED_ROUND_EVICT = 2000;
     
 }
 

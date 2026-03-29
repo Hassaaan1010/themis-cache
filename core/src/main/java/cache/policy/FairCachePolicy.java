@@ -44,7 +44,6 @@ public class FairCachePolicy implements Policy {
         Map<String, Long> tenantDemandedSize = new HashMap<>();
         Map<String, Long> tenantNetRequirement = new HashMap<>();
         Map<String, Long> lenderDeservedDemand = new HashMap<>();
-        Map<String, Double> priorityMap = new HashMap<>();
 
         ArrayList<Tenant> lenders = new ArrayList<>();
         ArrayList<Tenant> borrowers = new ArrayList<>();
@@ -145,21 +144,11 @@ public class FairCachePolicy implements Policy {
             }
         }
 
-        // Calculate Fairness-Effeciency Priority of Each tenant
-        for (Tenant tenant : this.tenantMap.values()) {
-
-            // 1 / (A/R) * min(0, demand)
-            double priority = (1 / tenant.getAllocationRatio())
-                    * Math.max(tenantNetRequirement.get(tenant.getHashToken()), 0);
-
-            priorityMap.put(tenant.getHashToken(), priority);
-        }
-
         // TODO: removing from distribution should always be a method call that performs
         // a transaction that maintains consistency in metrics.
 
         // Sort Borrowers in desc order of A/R. Most advantaged first
-        // May leave out bor rowers with A/R slightly above 1 but not enought to be
+        // May leave out borrowers with A/R slightly above 1 but not enought to be
         // prempted from if demand doesnt require,
         // this is fine because as long as lenders are getting as much as they need when
         // they need,
@@ -238,7 +227,10 @@ public class FairCachePolicy implements Policy {
             // and premption only took out what was needed for use. Then this condition
             // might never occur.
 
-            // TODO: Distribute remaining for effeceincy maxing or by random
+            // TODO: Distribute remaining for effeceincy maxing or by random or to most prempted borrower;
+            
+            Tenant mostPrempted = borrowers.get(0);
+            mostPrempted.setCurrentTotalAllocation(mostPrempted.getCurrentTotalAllocation() + distributable);
 
         }
 
@@ -248,8 +240,6 @@ public class FairCachePolicy implements Policy {
             double weight = CoreConstants.TOTAL_CACHE_SIZE / tenant.getCurrentTotalAllocation();
             tenant.setCurrentWeight(weight);
         } 
-
-
 
     }
 
@@ -331,18 +321,9 @@ public class FairCachePolicy implements Policy {
 
         return distributed;
     }
-}
 
-// Find available to Distribute
-// Process Tenants
-// Distribute stock
-// for each tenant if net requirement < 0 add abs(netRequirement) to
-// availableToDistribute;
-// for each lender:
-// if cold:
-// remove cold Region and add to avialableToDistribute;
-// subtract tenant.currentAllocation - cold
-// evict cold items?
-// Sort by summationAllocation / summationFairShare
-// Extract Lenders A/R < 1
-// Extract Borrowers A/R > 1
+    @Override
+    public Map<String, ArrayList<String>> getTenantEvictablesMap() {
+        return tenantEvictablesMap;
+    }
+}

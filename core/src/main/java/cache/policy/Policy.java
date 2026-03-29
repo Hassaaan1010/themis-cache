@@ -1,5 +1,8 @@
 package cache.policy;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 public interface Policy {
 
     // String evict(Map<String, ByteString> cache);
@@ -8,4 +11,6 @@ public interface Policy {
     
 
     void redistribute();
+
+    Map<String,ArrayList<String>> getTenantEvictablesMap();
 } 

@@ -1,6 +1,8 @@
 package tenants;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +16,7 @@ import cache.Cache;
 import cache.policy.FairCachePolicy;
 import cache.policy.Policy;
 import common.LogUtil;
+import commonCore.CoreConstants;
 import db.MongoService;
 import server.EchoServer;
 import server.controllers.AuthController;
@@ -43,11 +46,11 @@ public class TenantGroup {
         for (Document tenantDoc : allTenants) {
             // Make hashList
             String hash = AuthController.getMurmurHash.apply(
-                tenantDoc.getObjectId("_id").toString(),
-                tenantDoc.getString("password"));
-                
+                    tenantDoc.getObjectId("_id").toString(),
+                    tenantDoc.getString("password"));
+
             double startingWeight = tenantDoc.getDouble("weight");
-                
+
             authHashesSet.add(hash);
 
             // Init tenant
@@ -62,10 +65,10 @@ public class TenantGroup {
         // Initialize policy
         this.policy = new FairCachePolicy(this);
 
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("✅ Create Tenant Group");
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("✅ Create Tenant Group");
 
     }
-
 
     public Set<String> getAuthHashesSet() {
         return Collections.unmodifiableSet(authHashesSet);
@@ -79,19 +82,49 @@ public class TenantGroup {
         return tenantsMap;
     }
 
-
-    public void amortizedEvict() {
-        // Either evict a max number of keys or hit a certain size quota
-        
+    public Policy getPolicy() {
+        return policy;
     }
 
-    public void stopTheWorldEvent() {
+    public void amortizedEvict(Map<String, ArrayList<String>> evictablesMap) throws Exception {
+        // Either evict a max number of keys or hit a certain size quota
+        int maxEvictions = CoreConstants.MAX_TOTAL_AMORTIZED_ROUND_EVICT;
+
+        // Sort by tenant.available ascending order
+        ArrayList<Tenant> tenants = new ArrayList<>(tenantsMap.values());
+        tenants.sort(Comparator.comparingLong(t -> t.getAvailable()));
+
+        for (Tenant tenant : tenants) {
+
+            String tenantHash = tenant.getHashToken();
+
+            ArrayList<String> coldList = evictablesMap.get(tenantHash);
+            Cache tenantCache = this.tenantCacheMap.get(tenantHash);
+
+            while (maxEvictions > 0 || !coldList.isEmpty()) {
+                String victim = coldList.remove(-1);
+                try {
+                    tenantCache.remove(victim);
+                } catch (Exception e) {
+                    if (EchoServer.DEBUG_SERVER)
+                        LogUtil.log("Error evicitng a key", "key", victim,
+                                tenantCache.getFrequencyCounter().getCount(victim), "Error", e.getMessage());
+                    throw new Exception("Error while evicting key");
+                }
+
+                maxEvictions--;
+
+            }
+        }
+    }
+
+    public void stopTheWorldEvent() throws Exception {
 
         this.policy.redistribute();
+        Map<String, ArrayList<String>> evictablesMap = this.policy.getTenantEvictablesMap();
 
-        // TODO: Adjust rate limits and buckets for tenant allocation.
-        
-        throw new UnsupportedOperationException("Unimplemented method 'rebalance'");
+        amortizedEvict(evictablesMap);
+
     }
 
     public int incrementRound() {
@@ -99,42 +132,3 @@ public class TenantGroup {
         return this.completedRounds;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// CoreConstants.THRESHOLD_FREQUENCY;
-
-/*
-When this function is called, 
-get starting weights
-get current weights?
-get current allocation
-get frequency map
-get average allocation for tenant... debt/due
-
-rank by debt
-
-let total memory be T
-
-fair constant share be : r1,r2....
-current allocation be: a1,a2,....
-
-need final:
-new weights w'1, w'2...
-multiply by X and distribute
-
-*/

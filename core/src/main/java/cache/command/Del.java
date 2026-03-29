@@ -14,7 +14,6 @@ public final record Del(
 
     @Override
     public Response execute(Tenant tenant) throws Exception {
-        // TODO remove k:v from cache
 
         tenant.getCache().remove(key);
         

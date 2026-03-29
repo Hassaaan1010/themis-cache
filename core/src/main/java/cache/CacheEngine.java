@@ -76,7 +76,7 @@ public final class CacheEngine {
 
                 // amortized eviction (small continuous work)
                 if (now - lastAmortization >= CoreConstants.AMORTIZATION_WINDOW) {
-                    tenantGroup.amortizedEvict();   // evict small amount
+                    tenantGroup.amortizedEvict(tenantGroup.getPolicy().getTenantEvictablesMap());   // evict small amount
                     lastAmortization = now;
                 }
 
