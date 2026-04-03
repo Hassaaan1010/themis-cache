@@ -2,11 +2,14 @@ package tenants;
 
 import cache.Cache;
 import cache.demand.DemandTracker;
+import common.LogUtil;
 import commonCore.CoreConstants;
+import server.EchoServer;
 
 public class Tenant {
 
     private final String hashToken;
+    private final String name;
 
     private final Cache cache;
 
@@ -23,9 +26,10 @@ public class Tenant {
 
     private final DemandTracker demandTracker;
 
-    public Tenant(double weight, String hashToken) {
+    public Tenant(double weight, String name, String hashToken) {
 
         this.cache = new cache.Cache(this);
+        this.name = name;
 
         // this.currentWeight = weight;
         this.hashToken = hashToken;
@@ -40,6 +44,10 @@ public class Tenant {
         this.summationFairShare = 0;
         this.summationAllocation = 0;
 
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("Tenant " + hashToken + " Metrics", "r", fairShareAllocation, "a", currentTotalAllocation, "A",
+                    summationAllocation, "R", summationFairShare, "Current Weight", currentWeight);
+
         this.demandTracker = new DemandTracker();
     }
 
@@ -47,6 +55,10 @@ public class Tenant {
     // public double getCurrentWeight() {
     // return currentWeight;
     // }
+
+    public String getName() {
+        return name;
+    }
 
     public double getFairShareWeight() {
         return fairShareWeight;
@@ -72,8 +84,20 @@ public class Tenant {
         return this.summationAllocation - this.summationFairShare;
     }
 
+    public long getSummationAllocation() {
+        return summationAllocation;
+    }
+
+    public long getSummationFairShare() {
+        return summationFairShare;
+    }
+
     public double getAllocationRatio() {
-        return this.summationAllocation / this.summationFairShare;
+        if (this.getSummationFairShare() == 0) {
+            return 1;
+        }
+
+        return (double) this.getSummationAllocation() / this.getSummationFairShare();
     }
 
     public void useAvailable(long newUse) throws Exception {
@@ -138,30 +162,41 @@ public class Tenant {
     }
 
     public void updateCompletedRoundMetrics(long completedRounds) {
-        this.summationAllocation += this.currentTotalAllocation;
-        this.summationFairShare += this.fairShareAllocation;
+        this.summationAllocation += this.getCurrentTotalAllocation();
+        this.summationFairShare += this.getFairShareAllocation();
     }
 
     /**
      * Will not prempt more than debt.
      * 
-     * @param demandedAmmount
+     * @param demandedAmount
      * @return
      */
-    public long premptFromDebt(long demandedAmmount) {
+    public long premptFromDebt(long demandedAmount) {
 
         // Can not prempt more than what is owed.
-        demandedAmmount = Math.min(demandedAmmount, this.getDebt());
+        demandedAmount = Math.min(demandedAmount, this.getDebt());
 
         // Leave some space for critical keys.
         long unpremptable = (long) Math.floor(CoreConstants.UNPREMPTABLE_PERCENTAGE * this.getFairShareAllocation());
         long curAllocation = this.getCurrentTotalAllocation();
+        long premptedAmount;
 
+        
         if (unpremptable >= curAllocation) {
-            return 0;
+            premptedAmount = 0;
         } else {
             long premptable = curAllocation - unpremptable;
-            return Math.min(premptable, demandedAmmount);
+            premptedAmount = Math.min(premptable, demandedAmount);
+            this.setCurrentTotalAllocation(curAllocation - premptedAmount);
         }
+        
+        LogUtil.log("Premption occurance", 
+        "Demanded Amount", demandedAmount,
+         "Unpremptable", unpremptable,
+         "Premptable", curAllocation - unpremptable,
+        "current Allocation", curAllocation,
+         "Prempted Amount", premptedAmount);
+        return premptedAmount;
     }
 }

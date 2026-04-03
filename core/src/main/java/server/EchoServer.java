@@ -1,7 +1,5 @@
 package server;
 
-
-
 import application.AppContext;
 import common.CommonConstants;
 import common.LogUtil;
@@ -21,12 +19,11 @@ import server.handlers.TenantRateLimitHandler;
 import server.parsing.ProtobufServerCodec;
 import server.rateLimiting.BucketsOwner;
 
+public class EchoServer {
 
-public class EchoServer{
+    public static final boolean DEBUG_SERVER = false;
 
-    public static final boolean DEBUG_SERVER = true;
-
-    private final AppContext context; 
+    private final AppContext context;
     private final BucketsOwner tokenBuckets;
 
     private final int port;
@@ -34,19 +31,19 @@ public class EchoServer{
     private NioEventLoopGroup bossGroup;
     private NioEventLoopGroup workerGroup;
 
-    public EchoServer(AppContext context ) throws Exception {
+    public EchoServer(AppContext context) throws Exception {
         this.port = CommonConstants.SERVER_PORT;
-        
+
         this.context = context;
         this.tokenBuckets = this.context.getBucketsOwner();
         try {
-            // Bootstrap bucket owner  
-    
+            // Bootstrap bucket owner
+
             // Server hooks for shutdown
             Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
-    
+
         } catch (Exception e) {
-            LogUtil.log("Echo Server Initialization failed.","Exception", e);
+            LogUtil.log("Echo Server Initialization failed.", "Exception", e);
         }
     }
 
@@ -72,34 +69,38 @@ public class EchoServer{
                         @Override
                         protected void initChannel(SocketChannel ch) {
                             ch.pipeline()
-                                    // .addLast(new ReadTimeoutHandler(3))                  // close inactive connections
-                                    .addLast(new SafeReqFrameDecoder())                     // inbound frame decoder
-                                    .addLast(codec.newDecoder())                            // inbound protobuf decoder
-                                    
-                                    .addLast(new ProtobufVarint32LengthFieldPrepender())    // outbound length prepend
-                                    .addLast(codec.newEncoder())                            // outbound protobuf encoder
-                                    
+                                    // .addLast(new ReadTimeoutHandler(3)) // close inactive connections
+                                    .addLast(new SafeReqFrameDecoder()) // inbound frame decoder
+                                    .addLast(codec.newDecoder()) // inbound protobuf decoder
+
+                                    .addLast(new ProtobufVarint32LengthFieldPrepender()) // outbound length prepend
+                                    .addLast(codec.newEncoder()) // outbound protobuf encoder
+
                                     .addLast(new TenantRateLimitHandler(tokenBuckets))
-                                    .addLast(new EchoServerHandler(context));               // inbound business logic
-                                    // .addLast(new ErrorInboundHandler());                 // inboundexception handling
+                                    .addLast(new EchoServerHandler(context)); // inbound business logic
+                            // .addLast(new ErrorInboundHandler()); // inboundexception handling
                         }
                     });
 
             channelFuture = b.bind(port).sync();
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Server started:", "Port", port);
+            if (EchoServer.DEBUG_SERVER)
+                LogUtil.log("Server started:", "Port", port);
             channelFuture.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Error in Echo Server starting : ", "Error", e);
+            if (EchoServer.DEBUG_SERVER)
+                LogUtil.log("Error in Echo Server starting : ", "Error", e);
         } finally {
-            if (EchoServer.DEBUG_SERVER) LogUtil.log("Shutting down server thread groups.");
+            if (EchoServer.DEBUG_SERVER)
+                LogUtil.log("Shutting down server thread groups.");
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
     }
 
     public void shutdown() {
-        if (EchoServer.DEBUG_SERVER) LogUtil.log("Shutting down server gracefully...");
+        if (EchoServer.DEBUG_SERVER)
+            LogUtil.log("Shutting down server gracefully...");
         if (channelFuture != null) {
             channelFuture.channel().close();
         }

@@ -42,27 +42,32 @@ public class DemandTracker {
         } else {
             metrics.set(0, metrics.get(0) + 1);
         }
+
+
+        // LogUtil.log("Get Failed.", "key",key, "Metrics", metrics);
     }
 
     public void setFail(String key, ByteString value) {
 
         ArrayList<Integer> metrics = demandMap.get(key);
-
+        
+        
         if (metrics == null) {
-
+            
             metrics = new ArrayList<>();
             metrics.add(1); // Frequency
             metrics.add(value.size()); // Size
-
+            
             demandMap.put(key, metrics);
-
+            
         } else {
             metrics.set(0, metrics.get(0) + 1);
             metrics.set(1, Math.max(metrics.get(1), value.size())); // Max size for accomodating largest demand
-                                                                    // possible. This can not be exploited due to
-                                                                    // fairness guarantee
+            // possible. This can not be exploited due to
+            // fairness guarantee
         }
-
+        // LogUtil.log("Set Failed.", "key",key, "Metrics", metrics);
+        
     }
 
     public void stopTracking(String key) {
@@ -70,7 +75,13 @@ public class DemandTracker {
     }
 
     public Short getFrequency(String key) {
-        Integer freq = this.demandMap.get(key).get(0);
+        ArrayList<Integer> metrics = this.demandMap.get(key);
+        if (metrics == null) {
+            return 0;
+        }
+
+        Integer freq = metrics.get(0);
+
         Short result = null;
 
         if (freq >= Short.MAX_VALUE) {
@@ -98,7 +109,8 @@ public class DemandTracker {
 
     public void decayKey(String key) {
         demandMap.compute(key, (k, metrics) -> {
-            metrics.set(0, metrics.get(0) / 2);
+            // metrics.set(0, metrics.get(0) / 2);
+            metrics.set(0,0);
             return metrics;
         });
     }

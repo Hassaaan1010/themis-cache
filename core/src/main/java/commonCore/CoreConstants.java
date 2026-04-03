@@ -5,9 +5,9 @@ public class CoreConstants {
     private CoreConstants() {}  // prevent constructions
 
     // public static final 
-    public static final int MAX_FRAME_LENGTH = 1024*1024; //1MB
+    public static final int MAX_FRAME_LENGTH = 1000*1000 * 20; // 15MB
     public static final int MAX_CONNECTIONS_PER_TENANT = 100;
-    public static final int TOTAL_CACHE_SIZE = 1024*1024 * 500; // 500MB 
+    public static final int TOTAL_CACHE_SIZE = 1000*1000 * 100; // 100MB 
 
     public static final int QUEUE_CAPACITY = 1000;
 
@@ -18,8 +18,8 @@ public class CoreConstants {
     public static final int MAX_BOUNDED_EVICTIONS = 4; // TODO: Could potentially be attached to a coeffeceint of size. Larger vals may want more trials of bounded eviction....
     public static final int EVICTION_SAMPLE_SIZE = 10; // 
 
-    public static final int AMORTIZATION_WINDOW = 500;
-    public static final int REBALANCING_WINDOW = 1 * 60 * 1000; // in milli seconds
+    public static final int REBALANCING_WINDOW = 1 * 30 * 1000; // in milli seconds
+    public static final int AMORTIZATION_WINDOW = (int) REBALANCING_WINDOW / 4;
     // public static final int DECAYING_WINDOW; // Decaying be part of rebalancing (as sep thread?)
 
     
@@ -31,7 +31,7 @@ public class CoreConstants {
 
     higher threshold frequency = more cycles to acheive fairness.
     **/
-    public static final short THRESHOLD_FREQUENCY = 100; 
+    public static final short THRESHOLD_FREQUENCY = 7; 
     
     public static final double UNPREMPTABLE_PERCENTAGE = 0.2;
     public static final double FAIRNESS_PRIORITY = 0.5;

@@ -18,7 +18,10 @@ public final class Tracer {
         stack.push(System.nanoTime());
         names.push(name);
 
-        LogUtil.log("[LOG]", "Started", name, "Printables", printables + "");
+        if (printables == null) {
+            LogUtil.log("[LOG]", "Started", name);
+        }
+        LogUtil.log("[LOG]", "Started", name, "Printables", printables);
     }
 
     public static void end(String... printables) {
@@ -30,6 +33,9 @@ public final class Tracer {
 
         long dur = System.nanoTime() - start;
 
-        LogUtil.log("[LOG]", "Ended", name, "took_ns", dur, "Printables", printables + "");
+        if (printables == null) {
+            LogUtil.log("[LOG]", "Ended", name, "took_ns", dur, "Printables", printables);
+        }
+        LogUtil.log("[LOG]", "Ended", name, "took_ns", dur, "Printables", printables);
     }
 }

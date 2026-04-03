@@ -50,10 +50,11 @@ public class BucketsOwner {
 
     public void incrementBuckets() {
 
-        long start = System.nanoTime();
+        // long start = System.nanoTime();
 
-        if (EchoServer.DEBUG_SERVER)
-            LogUtil.log("Starting Bucket Increment");
+        // if (EchoServer.DEBUG_SERVER)
+        //     LogUtil.log("Starting Bucket Increment");
+        
         // Update portions in map
         updateWeights();
 
@@ -69,10 +70,10 @@ public class BucketsOwner {
                 tokenBuckets.get(tenantHashBucket).getAndSet(cap);
             }
         }
-        long end = System.nanoTime();
+        // long end = System.nanoTime();
 
-        if (EchoServer.DEBUG_SERVER)
-        LogUtil.log("Ended Bucket Increment", "took_ns", end - start, "buckets", tokenBuckets );
+        // if (EchoServer.DEBUG_SERVER)
+        // LogUtil.log("Ended Bucket Increment", "took_ns", end - start, "buckets", tokenBuckets );
     }
 
     private void updateWeights() {

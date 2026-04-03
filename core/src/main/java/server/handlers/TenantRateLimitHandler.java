@@ -49,9 +49,9 @@ public class TenantRateLimitHandler extends ChannelInboundHandlerAdapter {
                     tenantToken = req.getToken();
                 }
 
-                if (EchoServer.DEBUG_SERVER)
-                    LogUtil.log("------------- Rate Limit check: ", "Tenants' bucket",
-                            this.tokenBuckets.getBucketOfTenant(tenantToken));
+                // if (EchoServer.DEBUG_SERVER)
+                //     LogUtil.log("------------- Rate Limit check: ", "Tenants' bucket",
+                //             this.tokenBuckets.getBucketOfTenant(tenantToken));
 
                 // Rate limit check
                 if (!this.tokenBuckets.tryBucketDecrement(tenantToken)) {
